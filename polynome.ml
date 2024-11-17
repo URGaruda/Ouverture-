@@ -1,2 +1,3 @@
-type monome = int * int 
-and polynome = monome list ;;
+type monome = int * int ;;
+type polynome = monome list ;;
+  
