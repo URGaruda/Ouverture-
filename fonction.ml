@@ -31,7 +31,7 @@ let rec tri_rapide (l : polynome ref) (p : int) (r : int) =
 ;;
 
 
-let trie_croissant_polynome (l : polynome) : polynome =
+let trie_croissant_polynome (l : polynome) : polynome = (* Applique tri_rapide sur un polynôme *)
   let t = ref l in  
   tri_rapide t 0 ((List.length !t) - 1);  
   !t  
@@ -47,7 +47,7 @@ let fusionne_monome (l: polynome) (m: (int*int)) : polynome =
     (fusionne_monome_rec l (0) (snd m),(snd m))::(List.filter (fun x -> (snd x)!=(snd m) ) l) 
 ;;
 
-let rec fusionne_poly (l: polynome) : polynome = 
+let rec fusionne_poly (l: polynome) : polynome =  (* Enlève les degrés doublons dans les polynôme *)
   match l with 
   |[]->[]
   |(c,d)::t -> (fusionne_monome_rec l (0) (d),(d))::(fusionne_poly (List.filter (fun x -> (snd x)!=(d) ) l) )
