@@ -3,6 +3,7 @@ type monome = int * int
 and polynome = monome list ;;
 
 
+
 (* Exemples de polynômes *)
 let poly1:polynome = [(2,2); (-12,1); (22,0)];;
 let poly2:polynome = [(-12,1); (2,1); (22,0); (5,1)];;
@@ -10,6 +11,7 @@ let poly3:polynome = [(0,1); (5,1); (0,0)];;
 let poly4:polynome = [(5,3); (2,1); (22,0); (-2,1)];;
 let poly5:polynome = [(0,1)];;
 let poly6:polynome = [];;
+
 
 
 (* Question 1.2 *)
@@ -31,12 +33,14 @@ let canonique (p:polynome) : polynome =
          
   in remove_null (sort_by_degree (remove_double p));;
 
+
 canonique poly1;; 
 canonique poly2;; 
 canonique poly3;; 
 canonique poly4;; 
 canonique poly5;; 
 canonique poly6;; 
+
 
 
 (* Question 1.4 *)
@@ -54,6 +58,49 @@ let poly_prod (p1:polynome) (p2:polynome) : polynome =
   
   in canonique (aux p1 p2);; 
 
+
 poly_prod (canonique poly1) (canonique poly2);; 
 poly_prod (canonique poly2) (canonique poly3);; 
 poly_prod (canonique poly4) (canonique poly5);; 
+
+
+
+(* Question 1.5 *)
+type expression = 
+  | Int of int 
+  | Pow of char * int 
+  | Plus of expression list
+  | Mult of expression list;;
+
+
+
+(* Question 1.6 *)
+let figure1 = Plus [ Mult [Int 123;Pow ('x',1)] ; Int 42 ; Pow ('x',3) ];;
+let figure2 = Plus [ Int 5 ; Mult [Int 2; Pow ('x',2) ; Int 4] ; Int 2 ; Pow ('x',1) ; Mult [ Int 12 ; Pow ('x',3) ] ];;
+
+
+
+(* Question 1.7 *)
+let arb2poly (exp:expression) = 
+  
+  let rec mult2poly (l:expression list) (m:monome) : monome =
+    match l with
+    | [] -> (fst m, snd m)
+    | (h::t) -> match h with
+      | Int value -> (mult2poly t (value * fst m, snd m))
+      | Pow (var, value) -> if var = 'x' then (mult2poly t (fst m, value + snd m)) else raise (Invalid_argument "La variable doit etre x")
+      | _ -> raise (Invalid_argument "Mult ne peut contenir que des types Int et Pow")
+               
+  in let rec aux (exp:expression) : polynome = 
+       match exp with 
+       | Int value -> [(value, 0)]
+       | Pow (var, value) -> if var = 'x' then [(1, value)] else raise (Invalid_argument "La variable doit etre x")
+       | Mult list -> [(mult2poly list (1,0))]
+       | Plus [] -> []
+       | Plus (h::t) -> (aux h)@(aux (Plus t))
+
+  in (canonique (aux exp));;
+
+  
+arb2poly figure1;;
+arb2poly figure2;;
