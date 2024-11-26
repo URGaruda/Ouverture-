@@ -109,3 +109,58 @@ let arb2poly (exp:expression) : polynome =
   
 arb2poly figure1;;
 arb2poly figure2;;
+
+
+
+(* Question 1.8 *)
+let extraction_alea (l:int list) (p:int list) : (int list * int list) = 
+  
+  let random : int = 
+    Random.self_init ();
+    Random.int (List.length l)
+  
+  in let rec aux (l:int list) (i:int) : int list =
+       match l with
+       | [] -> []
+       | h::t -> if random <> i then h::(aux t (i+1)) else t
+          
+  in ((aux l 0), (List.nth l random)::p);; 
+
+
+(extraction_alea [1;2;3;4] [5;6;7;8]);;
+
+
+
+(* Question 1.9 *)
+let gen_permutation (n:int) =
+  
+  let rec gen_liste (cpt:int) : int list = 
+    if cpt = n then [n] else cpt::(gen_liste (cpt+1)) 
+                
+  in let rec aux (l:int list) (p:int list) : (int list * int list) =
+       if List.length l > 0 
+       then let c = (extraction_alea l p) in (aux (fst c) (snd c))
+       else ([], p)
+  
+  in snd (aux (gen_liste 1) []);;
+
+
+(gen_permutation 3);;
+
+  
+
+(* Question 1.10 *)
+type 'a tree = Empty | Node of 'a * 'a tree * 'a tree;;
+
+let abr (l:int list) : int tree =
+  
+  let rec insertion (n:int) (a:int tree) : int tree =
+    match a with
+    | Empty -> Node(n, Empty, Empty)
+    | Node(x, sag, sad) -> if x = n then raise (Invalid_argument "Chaque element doit etre unique")
+        else if x > n then Node(x, insertion n sag, sad) else Node(x, sag, insertion n sad)
+
+  in List.fold_left (fun acc x -> insertion x acc) Empty l;;
+
+
+abr [4;2;3;8;1;9;6;7;5];;
