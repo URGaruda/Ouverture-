@@ -81,20 +81,25 @@ let figure2 = Plus [ Int 5 ; Mult [Int 2; Pow ('x',2) ; Int 4] ; Int 2 ; Pow ('x
 
 
 (* Question 1.7 *)
-let arb2poly (exp:expression) = 
-  
-  let rec mult2poly (l:expression list) (m:monome) : monome =
+let arb2poly (exp:expression) : polynome = 
+
+  let testPow ((var, value) as p) : char * int =
+    if var <> 'x' then raise (Invalid_argument "La variable doit etre x")
+    else if value < 0 then raise (Invalid_argument "L'exposant des puissances doit etre positif ou nul") 
+    else p
+    
+  in let rec mult2poly (l:expression list) (m:monome) : monome =
     match l with
     | [] -> (fst m, snd m)
     | (h::t) -> match h with
       | Int value -> (mult2poly t (value * fst m, snd m))
-      | Pow (var, value) -> if var = 'x' then (mult2poly t (fst m, value + snd m)) else raise (Invalid_argument "La variable doit etre x")
+      | Pow (var, value) -> let p = (testPow (var, value)) in (mult2poly t (fst m, snd p + snd m))
       | _ -> raise (Invalid_argument "Mult ne peut contenir que des types Int et Pow")
                
   in let rec aux (exp:expression) : polynome = 
        match exp with 
        | Int value -> [(value, 0)]
-       | Pow (var, value) -> if var = 'x' then [(1, value)] else raise (Invalid_argument "La variable doit etre x")
+       | Pow (var, value) -> let p = (testPow (var, value)) in [(1, snd p)] 
        | Mult list -> [(mult2poly list (1,0))]
        | Plus [] -> []
        | Plus (h::t) -> (aux h)@(aux (Plus t))
