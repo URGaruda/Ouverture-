@@ -48,33 +48,73 @@ let poly_add p1 p2 =
   (* Trier le polynôme résultant*)
   List.sort (fun (_, d1) (_, d2) -> compare d1 d2) resultat;;
 
-(*expl*)
 
-(* Fonction pour afficher un polynôme *)
-let afficher_polynome p =
-  let rec aux acc = function
-    | [] -> acc
-    | (coef, deg) :: tl ->
-        let monome_str =
-          if coef = 0 then ""  (* Ignorer les monômes à coefficient nul *)
-          else
-            let coef_str = if coef = 1 then "" else string_of_int coef in
-            let deg_str = if deg = 0 then "" else "x" ^ (if deg = 1 then "" else "^" ^ string_of_int deg) in
-            if deg = 0 then string_of_int coef (* Monome constant *)
-            else coef_str ^ deg_str
+(* 1.6*)
+
+  let expr= Plus([Mult([Int 123;Pow('x',1)]);Int 42;Pow('x',3)]);;
+
+
+
+
+(* 1.7*)
+
+(* car mult et plus ont des contraintes de type*)
+type mult_exclusion=
+  |Int of int
+  |Pow of char * int ;;
+
+type plus_exclusion= 
+  |Int of int
+  |Pow of char * int 
+  |Mult of mult_exclusion list;;
+
+type expression =
+  |Int of int
+  |Pow of char * int 
+  |Plus of plus_exclusion list
+  |Mult of mult_exclusion list;;
+
+
+
+
+
+
+            
+
+exception Entier_neg;;
+
+let arb2poly (abr:expression)= 
+  let tree=function 
+    |Int(x)->if x>=0 then [((x,0):monome)] else raise Entier_neg
+  
+    |Pow('x',a)-> [((1,a):monome)]
+        
+        
+    |Mult([Int(x);Pow('x',a)]) | Mult([Pow('x',a);Int(x)])-> if x>=0&& a>0 then [((x,a):monome)] else raise Entier_neg
+        
+    |Plus(a::q)-> let rec pls (li:plus_exclusion list) =
+                    match li with 
+                    |Int(x)::tl -> if x>=0 then ((x,0):monome)::pls tl else raise Entier_neg
+                    |Pow('x',a)::tl-> if a>=0 then ((1,a):monome)::pls tl else raise Entier_neg
+                    |Mult([Int(x);Pow('x',a)])::tl | Mult([Pow('x',a);Int(x)])::tl-> if a>=0&& x>0 then((x,a):monome)::pls tl else raise Entier_neg
+                    |_->((0,0):monome)::[]
+                                                     
+        in 
+        let aux = (* pour le premier terme*)
+          match a with
+          | Int(x) ->if x>=0 then  [((x, 0):monome)] else raise Entier_neg
+          | Pow('x', a) ->if a>=0 then[((1, a):monome)] else raise Entier_neg
+          | Mult([Int(x); Pow('x', a)]) -> if a>=0&& x>0 then [((x, a):monome)] else raise Entier_neg
+          |_->((0,0):monome)::[]
+
         in
-        let acc_str = if acc = "" then monome_str else (if coef > 0 then " + " else " - ") ^ monome_str in
-        aux (acc ^ acc_str) tl
-  in
-  let result = aux "" p in
-  if result = "" then "0" else result;;
+        aux @ pls q
+  in canonique(tree abr);; 
+
+(* exple*)
+
+arb2poly(expr);;
 
 
 
 
-// erreur à corriger
-let p1 = [(3, 2); (1, 1); (2, 0)]  
-let p2 = [(5, 1); (4, 0)]           
-
-let p_sum = poly_add p1 p2
-let () = print_endline (afficher_polynome p_sum)  
