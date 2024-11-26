@@ -75,12 +75,6 @@ type expression =
   |Mult of mult_exclusion list;;
 
 
-
-
-
-
-            
-
 exception Entier_neg;;
 
 let arb2poly (abr:expression)= 
