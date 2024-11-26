@@ -80,12 +80,8 @@ exception Entier_neg;;
 let arb2poly (abr:expression)= 
   let tree=function 
     |Int(x)->if x>=0 then [((x,0):monome)] else raise Entier_neg
-  
     |Pow('x',a)-> [((1,a):monome)]
-        
-        
     |Mult([Int(x);Pow('x',a)]) | Mult([Pow('x',a);Int(x)])-> if x>=0&& a>0 then [((x,a):monome)] else raise Entier_neg
-        
     |Plus(a::q)-> let rec pls (li:plus_exclusion list) =
                     match li with 
                     |Int(x)::tl -> if x>=0 then ((x,0):monome)::pls tl else raise Entier_neg
