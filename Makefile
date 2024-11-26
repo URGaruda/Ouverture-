@@ -1,8 +1,11 @@
 UTOP = /usr/bin/utop
 
-PROGRAMS = fonction essai
+PROGRAMS = fonction essai arbre
 
 all: $(PROGRAMS) 
+
+arbre : polynome.cmo fonction.cmo arbre.ml
+	ocamlc -o arbre polynome.cmo fonction.cmo arbre.ml
 
 essai : essai.ml 
 	ocamlc -o essai essai.ml 
@@ -12,6 +15,10 @@ fonction : polynome.cmo fonction.ml
 
 polynome.cmo : polynome.ml
 	ocamlc -c  polynome.ml
+
+fonction.cmo : fonction.ml
+	ocamlc -c fonction.ml 
+
 
 utop: all
 				 @$(UTOP) -init ocamlinit.ml
