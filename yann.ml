@@ -132,14 +132,14 @@ let extraction_alea (l:int list) (p:int list) : (int list * int list) =
 
 
 (* Question 1.9 *)
-let gen_permutation (n:int) =
+let gen_permutation (n:int) : int list =
   
   let rec gen_liste (cpt:int) : int list = 
     if cpt = n then [n] else cpt::(gen_liste (cpt+1)) 
                 
   in let rec aux (l:int list) (p:int list) : (int list * int list) =
        if List.length l > 0 
-       then let c = (extraction_alea l p) in (aux (fst c) (snd c))
+       then let extr = (extraction_alea l p) in (aux (fst extr) (snd extr))
        else ([], p)
   
   in snd (aux (gen_liste 1) []);;
