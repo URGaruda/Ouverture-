@@ -133,3 +133,24 @@ let my_li= [1;3;6];;
 extraction_alea my_list my_li;; 
 
 
+(*1.9*)
+let gen_permutation n = 
+  let rec gen acc i = 
+    if i > n then acc
+    else gen ((i)::acc) (i + 1)
+  in 
+  let rec remp li acc = 
+    let l = List.length li in
+    if l = 0 then acc
+    else 
+      let new_li, new_acc = extraction_alea li acc in
+      remp new_li new_acc
+  in
+  
+  let liste_initiale = gen [] 1 in
+  remp liste_initiale [];;
+
+(*1.9*)
+gen_permutation 4;;
+
+
