@@ -1,8 +1,11 @@
 UTOP = /usr/bin/utop
 
-PROGRAMS = fonction essai arbre
+PROGRAMS = fonction essai arbre abr
 
 all: $(PROGRAMS) 
+
+abr : abr.ml
+	ocamlc -o abr abr.ml 
 
 arbre : polynome.cmo fonction.cmo arbre.ml
 	ocamlc -o arbre polynome.cmo fonction.cmo arbre.ml
