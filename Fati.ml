@@ -106,5 +106,22 @@ let arb2poly (abr:expression)=
 arb2poly(expr);;
 
 
+(*1.8*)
+
+
+let extraction_alea li la = (*remplacer li et la par L et P, (c'etait pas possible sur tryOcaml)*)
+  
+  let l = List.length li in 
+  if l = 0 then
+    (li, la) else
+    let r= 1+ Random.int l in 
+    let e =List.nth li (r-1) in (li,e::la);;  
+    
+    
+let my_list = [10; 20; 30; 40; 50];;
+let my_li= [1;3;6];;
+
+(*test*)                                    
+extraction_alea my_list my_li;; 
 
 
