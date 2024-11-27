@@ -109,13 +109,21 @@ arb2poly(expr);;
 (*1.8*)
 
 
-let extraction_alea li la = (*remplacer li et la par L et P, (c'etait pas possible sur tryOcaml)*)
+let extraction_alea li la = (* rempacer li et la par L et P*)
   
   let l = List.length li in 
   if l = 0 then
     (li, la) else
-    let r= 1+ Random.int l in 
-    let e =List.nth li (r-1) in (li,e::la);;  
+    let r= 1+ Random.int l in
+    let remove lr indexr =
+      let rec aux lr acc i =
+        match lr with
+        | [] -> List.rev acc 
+        | hd :: tl -> if i = indexr then List.rev_append acc tl else aux tl (hd :: acc) (i + 1)
+      in
+      aux li [] 0 in
+    let e =List.nth li (r-1) in ((remove li (r-1)),e::la);;  
+  
     
     
 let my_list = [10; 20; 30; 40; 50];;
