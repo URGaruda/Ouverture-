@@ -87,14 +87,14 @@ let arb2poly (exp:expression) : polynome =
     else if value < 0 then raise (Invalid_argument "L'exposant des puissances doit etre positif ou nul") 
     else p
     
-  in let rec mult2mono (l:expression list) (m:monome) (is_first_exp:bool) : polynome =
+  in let rec mult2poly (l:expression list) (m:monome) (is_first_exp:bool) : polynome =
        if List.length l < 2 && is_first_exp then raise (Invalid_argument "Un produit doit contenir au moins 2 expressions")
        else match l with
          | [] -> [(fst m, snd m)]
          | (h::t) -> match h with
-           | Int value -> (mult2mono t (value * fst m, snd m) false)
-           | Pow (var, value) -> let p = (testPow (var, value)) in (mult2mono t (fst m, snd p + snd m) false)
-           | Plus list -> poly_prod (plus2poly list true) (mult2mono t (fst m, snd m) false)
+           | Int value -> (mult2poly t (value * fst m, snd m) false)
+           | Pow (var, value) -> let p = (testPow (var, value)) in (mult2poly t (fst m, snd p + snd m) false)
+           | Plus list -> poly_prod (plus2poly list true) (mult2poly t (fst m, snd m) false)
            | Mult _ -> raise (Invalid_argument "Un produit ne peut pas contenir de produits") 
                
   and plus2poly (l:expression list) (is_first_exp:bool) : polynome = 
@@ -104,14 +104,14 @@ let arb2poly (exp:expression) : polynome =
       | (h::t) -> match h with
         | Int value -> [(value, 0)]@(plus2poly t false)
         | Pow (var, value) -> let p = (testPow (var, value)) in [(1, snd p)]@(plus2poly t false)
-        | Mult list -> (mult2mono list (1,0) true)@(plus2poly t false)
+        | Mult list -> (mult2poly list (1,0) true)@(plus2poly t false)
         | Plus _ -> raise (Invalid_argument "Une somme ne peut pas contenir de sommes")      
 
   in let aux (exp:expression) : polynome = 
        match exp with 
        | Int value -> [(value, 0)]
        | Pow (var, value) -> let p = (testPow (var, value)) in [(1, snd p)] 
-       | Mult list -> (mult2mono list (1,0) true)
+       | Mult list -> (mult2poly list (1,0) true)
        | Plus list -> (plus2poly list true)
   
   in (canonique (aux exp));;
