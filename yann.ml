@@ -76,7 +76,6 @@ type expression =
 
 (* Question 1.6 *)
 let figure1 = Plus [ Mult [Int 123;Pow ('x',1)] ; Int 42 ; Pow ('x',3) ];;
-let figure2 = Plus [ Int 5 ; Mult [Int 2; Pow ('x',2) ; Int 4] ; Int 2 ; Pow ('x',1) ; Mult [ Int 12 ; Pow ('x',3) ] ];;
 
 
 
@@ -88,27 +87,77 @@ let arb2poly (exp:expression) : polynome =
     else if value < 0 then raise (Invalid_argument "L'exposant des puissances doit etre positif ou nul") 
     else p
     
-  in let rec mult2poly (l:expression list) (m:monome) : monome =
-    match l with
-    | [] -> (fst m, snd m)
-    | (h::t) -> match h with
-      | Int value -> (mult2poly t (value * fst m, snd m))
-      | Pow (var, value) -> let p = (testPow (var, value)) in (mult2poly t (fst m, snd p + snd m))
-      | _ -> raise (Invalid_argument "Mult ne peut contenir que des types Int et Pow")
+  in let rec mult2mono (l:expression list) (m:monome) (is_first_exp:bool) : polynome =
+       if List.length l < 2 && is_first_exp then raise (Invalid_argument "Un produit doit contenir au moins 2 expressions")
+       else match l with
+         | [] -> [(fst m, snd m)]
+         | (h::t) -> match h with
+           | Int value -> (mult2mono t (value * fst m, snd m) false)
+           | Pow (var, value) -> let p = (testPow (var, value)) in (mult2mono t (fst m, snd p + snd m) false)
+           | Plus list -> poly_prod (plus2poly list true) (mult2mono t (fst m, snd m) false)
+           | Mult _ -> raise (Invalid_argument "Un produit ne peut pas contenir de produits") 
                
-  in let rec aux (exp:expression) : polynome = 
+  and plus2poly (l:expression list) (is_first_exp:bool) : polynome = 
+    if List.length l < 2 && is_first_exp then raise (Invalid_argument "Une somme doit contenir au moins 2 expressions")
+    else match l with 
+      | [] -> []
+      | (h::t) -> match h with
+        | Int value -> [(value, 0)]@(plus2poly t false)
+        | Pow (var, value) -> let p = (testPow (var, value)) in [(1, snd p)]@(plus2poly t false)
+        | Mult list -> (mult2mono list (1,0) true)@(plus2poly t false)
+        | Plus _ -> raise (Invalid_argument "Une somme ne peut pas contenir de sommes")      
+
+  in let aux (exp:expression) : polynome = 
        match exp with 
        | Int value -> [(value, 0)]
        | Pow (var, value) -> let p = (testPow (var, value)) in [(1, snd p)] 
-       | Mult list -> [(mult2poly list (1,0))]
-       | Plus [] -> []
-       | Plus (h::t) -> (aux h)@(aux (Plus t))
-
+       | Mult list -> (mult2mono list (1,0) true)
+       | Plus list -> (plus2poly list true)
+  
   in (canonique (aux exp));;
 
-  
+
+(* Cas nominaux *)
+let int1 = Int 5 ;;
+let int2 = Int (-4) ;;
+let pow1 = Pow ('x', 1) ;;
+let pow2 = Pow ('x', 2) ;;
+let plus1 = Plus [int1 ; int2] ;;
+let plus2 = Plus [int1 ; pow2] ;;
+let mult1 = Mult [int1 ; pow1] ;;
+let mult2 = Mult [int1 ; int2 ;  pow1 ; pow2] ;;
+let mult3 = Mult [plus2 ; pow2] ;;
+let plus3 = Plus [mult1 ; mult2] ;;
+let figure2 = Plus [ Int 5 ; Mult [Int 2; Pow ('x',2) ; Int 4] ; Int 2 ; Pow ('x',1) ; Mult [ Int 12 ; Pow ('x',3) ] ] ;;
+
+arb2poly int1 ;;
+arb2poly int2 ;;
+arb2poly pow1 ;;
+arb2poly pow2 ;;
+arb2poly plus1 ;;
+arb2poly plus2 ;;
+arb2poly mult1 ;;
+arb2poly mult2 ;;
+arb2poly mult3 ;;
+arb2poly plus3 ;;
 arb2poly figure1;;
 arb2poly figure2;;
+
+
+(* Cas d'erreur *)
+let pow3 = Pow ('y', 1) ;;
+let pow4 = Pow ('x', -1) ;;
+let plus4 = Plus [int1] ;;
+let plus5 = Plus [plus1 ; mult1] ;;
+let mult4 = Mult [pow1] ;;
+let mult5 = Mult [mult1 ; plus2] ;;
+
+arb2poly pow3 ;;
+arb2poly pow4 ;;
+arb2poly plus4 ;;
+arb2poly plus5 ;;
+arb2poly mult4 ;;
+arb2poly mult5 ;;
 
 
 
