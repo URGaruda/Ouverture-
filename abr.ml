@@ -1,3 +1,4 @@
+open Arbre ;;
 type 'a btree =
   | Empty
   | Node of 'a btree * 'a * 'a btree
@@ -11,7 +12,7 @@ let abr (l:int list) : 'a btree =
   let rec insert_abr (n:int) (a:'a btree) : 'a btree = 
     match a with
     |Empty -> Node(Empty,n,Empty)
-    |Node(g,e,d) -> if n<e then Node((insert_abr n g),e,d) else Node(g,e,(insert_abr n d))
+    |Node(g,e,d) -> if n=e then Node(g,e,d) else if n<e then Node((insert_abr n g),e,d) else Node(g,e,(insert_abr n d))
 
   in let rec abr_cons (l:int list) (a:'a btree): 'a btree =
     match l with
@@ -34,8 +35,36 @@ let is_abr (a:'a btree) : bool =
   in it_is a Empty Empty 
 ;;
 
+let rec etiquetage (a:'a btree) : expression =
+  match a with
+  |Empty -> if Random.float 1.0 < 0.5 then Int ((Random.int 401)-200) else Pow ('x',1)
+  |Node(Empty,e,Empty) -> if e mod 2 = 1 then Mult [Int ((Random.int 401)-200);Pow ('x',1)] else Pow ('x',Random.int 101)
+  |Node(g,e,d)-> if Random.float 1.0 < 0.75 then Plus [ etiquetage g;etiquetage d ] else Mult [etiquetage g;etiquetage d]
+;;
+let gen_arb (e:expression) : expression = 
+  let rec recherche_expression (l:expression list) (n:char) (res:expression list): expression list =
+    match l with 
+    |[]->res
+    |h::t -> if n='M' then match h with
+                          |Int(x)-> recherche_expression t n (Int(x)::res)
+                          |Pow(c,x)-> recherche_expression t n (Pow(c,x)::res)
+                          |Plus(t)-> recherche_expression t n (Plus(t)::res)
+                          |Mult(t)-> recherche_expression t n ( (recherche_expression t n [] )@res)
+              else match h with 
+                          |Int(x)-> recherche_expression t n (Int(x)::res)
+                          |Pow(c,x)-> recherche_expression t n (Pow(c,x)::res)
+                          |Plus(t)-> recherche_expression t n ((recherche_expression t n [] ) @ res)
+                          |Mult(t)-> recherche_expression t n (Mult(t)::res)
+  
+  in match e with 
+  |Int(x)->Int(x)
+  |Pow(c,x)->Pow(c,x)
+  |Mult(t)-> Mult(recherche_expression t 'M' [])
+  |Plus(t)-> Plus(recherche_expression t 'P' [])
+;;
 abr [4;2;3;8;1;9;6;7;5] ;; 
 assert(is_abr (abr [4;2;3;8;1;9;6;7;5] )=true);;
 assert(is_abr (abr [4;8;3;2;1;9;6;7;5] )=true);;
 assert(is_abr (abr [4;2;3;8;6;7;5] )=true);;
 assert(is_abr (abr [4;2;3;8;1;9;6;7;5;11;24;15;48;32;42] )=true);;
+assert(is_abr (Node(Node(Empty,2,Empty),1,Empty))=false);;

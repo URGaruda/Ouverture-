@@ -54,16 +54,25 @@ let rec verifArbre (a:expression):bool= (* passe pas pour l'instant *)
 
 (*fonction qui converti une liste d'un mult en polynome*)
 let rec mult_to_poly (e: expression list) (r:monome) : polynome = 
-  match e with 
+  let rec research_nomone (l:polynome) (i:int): monome =
+    match l with 
+    |[]-> raise Not_found
+    |h::t-> if i=0 then h else research_nomone t (i-1)
+
+  in let rec distributivite (l :polynome) (r:monome) (f:polynome) : polynome =
+    match l with
+    |[]->f
+    |h::t-> distributivite t r (( (fst h)*(fst r),(snd h)+(snd r) )::f)
+
+  in match e with 
   |[]->[r]
   |h::t-> match h with 
           |Int(x)->if (fst r)=0 then mult_to_poly t ((fst r)+x,snd r) else mult_to_poly t ((fst r)*x,snd r)
           |Pow(c,x)->mult_to_poly t (fst r,(snd r)+x)
           |Mult(v)-> raise Not_found
-          |Plus(v)-> mult_to_poly t r 
-;;
-(*fonction qui converti une liste d'un plus en polynome*)
-let rec plus_to_poly (e: expression list) (r:polynome): polynome = 
+          |Plus(v)-> distributivite ( plus_to_poly v [] ) (research_nomone (mult_to_poly t r) 0) [] 
+                      
+and plus_to_poly (e: expression list) (r:polynome): polynome = (*fonction qui converti une liste d'un plus en polynome*)
   match e with 
   |[]->r
   |h::t-> match h with 
@@ -89,4 +98,6 @@ let arb2poly (e:expression) : polynome =
 
 assert((arb2poly figure3)=[(100,0); (123, 1);(1, 3)]) ;; 
 assert((arb2poly figure2)=[(7, 0); (1, 1); (8, 2); (12, 3)]);;
+assert((arb2poly (Mult [ Int 3; Pow('x', 1); Plus [ Pow ('x',2); Int 5 ] ]))=[(15, 1); (3, 3)]);;
+assert((arb2poly (Mult [ Int 3; Pow('x', 1); Plus [ Pow ('x',2); Int 5;Mult [ Int 123 ; Pow ('x',1)] ] ]))=[(15, 1); (369, 2); (3, 3)]);;
 
