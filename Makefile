@@ -4,8 +4,8 @@ PROGRAMS = fonction essai arbre abr
 
 all: $(PROGRAMS) 
 
-abr : abr.ml
-	ocamlc -o abr abr.ml 
+abr : fonction.cmo arbre.cmo  abr.ml 
+	ocamlc -o abr fonction.cmo arbre.cmo  abr.ml 
 
 arbre : polynome.cmo fonction.cmo arbre.ml
 	ocamlc -o arbre polynome.cmo fonction.cmo arbre.ml
@@ -22,6 +22,8 @@ polynome.cmo : polynome.ml
 fonction.cmo : fonction.ml
 	ocamlc -c fonction.ml 
 
+arbre.cmo : arbre.ml 
+	ocamlc -c arbre.ml
 
 utop: all
 				 @$(UTOP) -init ocamlinit.ml

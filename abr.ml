@@ -1,4 +1,5 @@
 open Arbre ;;
+
 type 'a btree =
   | Empty
   | Node of 'a btree * 'a * 'a btree
@@ -42,27 +43,31 @@ let rec etiquetage (a:'a btree) : expression =
   |Node(g,e,d)-> if Random.float 1.0 < 0.75 then Plus [ etiquetage g;etiquetage d ] else Mult [etiquetage g;etiquetage d]
 ;;
 let gen_arb (e:expression) : expression = 
-  let rec recherche_expression (l:expression list) (n:char) (res:expression list): expression list =
+  let rec recherche_expression (l:expression list) (n:char): expression list =
     match l with 
-    |[]->res
+    |[]->[]
     |h::t -> if n='M' then match h with
-                          |Int(x)-> recherche_expression t n (Int(x)::res)
-                          |Pow(c,x)-> recherche_expression t n (Pow(c,x)::res)
-                          |Plus(t)-> recherche_expression t n (Plus(t)::res)
-                          |Mult(t)-> recherche_expression t n ( (recherche_expression t n [] )@res)
+                          |Int(x)-> Int(x) :: recherche_expression t n 
+                          |Pow(c,x)-> Pow(c,x) ::  recherche_expression t n 
+                          |Plus(v)-> Plus( recherche_expression v n) :: recherche_expression t n 
+                          |Mult(v)-> recherche_expression v n @ recherche_expression t n 
               else match h with 
-                          |Int(x)-> recherche_expression t n (Int(x)::res)
-                          |Pow(c,x)-> recherche_expression t n (Pow(c,x)::res)
-                          |Plus(t)-> recherche_expression t n ((recherche_expression t n [] ) @ res)
-                          |Mult(t)-> recherche_expression t n (Mult(t)::res)
+                          |Int(x)-> Int(x) :: recherche_expression t n 
+                          |Pow(c,x)-> Pow(c,x) ::  recherche_expression t n 
+                          |Plus(v)-> recherche_expression v n @ recherche_expression t n 
+                          |Mult(v)-> Mult( recherche_expression v n ) :: recherche_expression t n 
   
   in match e with 
   |Int(x)->Int(x)
   |Pow(c,x)->Pow(c,x)
-  |Mult(t)-> Mult(recherche_expression t 'M' [])
-  |Plus(t)-> Plus(recherche_expression t 'P' [])
+  |Mult(t)-> Mult(recherche_expression t 'M' )
+  |Plus(t)-> Plus(recherche_expression t 'P' )
 ;;
-abr [4;2;3;8;1;9;6;7;5] ;; 
+
+let figure_droite = Plus [Mult [ Int 123 ; Pow ('x',1)]; Plus [Int 42 ;Pow ('x',3)]] ;;
+
+assert( (gen_arb figure_droite)=figure1);;
+
 assert(is_abr (abr [4;2;3;8;1;9;6;7;5] )=true);;
 assert(is_abr (abr [4;8;3;2;1;9;6;7;5] )=true);;
 assert(is_abr (abr [4;2;3;8;6;7;5] )=true);;
