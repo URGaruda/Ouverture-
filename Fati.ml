@@ -29,23 +29,21 @@ let canonique p =
   
   (* 1.3 Fonction poly_add qui additionne deux polynômes canoniques *)
 let poly_add p1 p2 =
-  let rec ajouter_polynomes p1 p2 acc =
+  let rec add p1 p2 acc =
     match p1, p2 with
-    | [], [] -> acc  (* Si les deux listes sont vides, on renvoie l'accumulateur *)
-    | (c1, d1) :: t1, [] -> (c1, d1) :: acc @ t1  (* Si p2 est vide, ajouter le reste de p1 *)
-    | [], (c2, d2) :: t2 -> (c2, d2) :: acc @ t2  (* Si p1 est vide, ajouter le reste de p2 *)
-    | (c1, d1) :: t1, (c2, d2) :: t2 when d1 = d2 ->  (* Si les degrés sont égaux, additionner les coefficients *)
-        let nouveau_coef = c1 + c2 in
-        if nouveau_coef = 0 then ajouter_polynomes t1 t2 acc  (* Si le coefficient est nul, ignorer *)
-        else ajouter_polynomes t1 t2 ((nouveau_coef, d1) :: acc)
-    | (c1, d1) :: t1, (c2, d2) :: t2 when d1 < d2 ->  (* Si le degré de p1 est plus petit que celui de p2 *)
-        ajouter_polynomes t1 p2 ((c1, d1) :: acc)
-    | (c1, d1) :: t1, (c2, d2) :: t2 ->  (* Si le degré de p2 est plus petit que celui de p1 *)
-        ajouter_polynomes p1 t2 ((c2, d2) :: acc)
+    | [], [] -> acc 
+    | (c1, d1) :: t1, [] -> (c1, d1) :: acc @ t1  
+    | [], (c2, d2) :: t2 -> (c2, d2) :: acc @ t2  
+    | (c1, d1) :: t1, (c2, d2) :: t2 when d1 = d2 -> 
+        let new_coef = c1 + c2 in
+        if new_coef = 0 then add t1 t2 acc
+        else add t1 t2 ((new_coef, d1) :: acc)
+    | (c1, d1) :: t1, (c2, d2) :: t2 when d1 < d2 -> 
+        add t1 p2 ((c1, d1) :: acc)
+    | (c1, d1) :: t1, (c2, d2) :: t2 ->  
+        add p1 t2 ((c2, d2) :: acc)
   in
-  (* Appeler la fonction récursive*)
-  let resultat = ajouter_polynomes p1 p2 [] in
-  (* Trier le polynôme résultant*)
+  let resultat = add p1 p2 [] in
   List.sort (fun (_, d1) (_, d2) -> compare d1 d2) resultat;;
 
 
