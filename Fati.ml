@@ -153,4 +153,60 @@ let gen_permutation n =
 (*1.9*)
 gen_permutation 4;;
 
+(*1.11*)
+type arbre = 
+  | Empty
+  |CharChild of char       
+  |IntChild of int
+  | Node of char * arbre * arbre;;
+
+
+let etiquetage (abr:int tree) : arbre =
+  Random.self_init ();
+  let rec aux (a:int tree) :arbre  =
+    match a with
+    | Empty -> Empty
+    |Node(c,Empty,Empty) -> if c mod 2 = 0 then Node('^',CharChild 'x',IntChild(Random.int 101))
+        else Node('*',IntChild((Random.int 401) - 200),CharChild('x')) 
+            
+            
+    | Node (c, Empty, sad) -> 
+        let p = Random.float 1.0 in
+        let q = Random.float 1.0 in
+        if p <= 0.75 then
+          if q < 0.5 then
+            Node ('+', IntChild (Random.int 1000), aux sad)
+          else
+            Node ('+', CharChild 'x', aux sad)
+        else
+        if q < 0.5 then
+          Node ('*', IntChild (Random.int 1000), aux sad)
+        else
+          Node ('*', CharChild 'x', aux sad)
+
+    | Node (c, sag, Empty) -> 
+        let p = Random.float 1.0 in
+        let q = Random.float 1.0 in
+        if p <= 0.75 then
+          if q < 0.5 then
+            Node ('+', aux sag, IntChild (Random.int 1000))
+          else
+            Node ('+', aux sag, CharChild 'x')
+        else
+        if q < 0.5 then
+          Node ('*', aux sag, IntChild (Random.int 1000))
+        else
+          Node ('*', aux sag, CharChild 'x')
+
+    | Node (c, sag, sad) -> 
+        let p = Random.float 1.0 in 
+        if p <= 0.75 then
+          Node ('+', aux sag, aux sad)
+        else
+          Node ('*', aux sag, aux sad)
+
+  in aux abr;;
+
+etiquetage( abr ([2;1;3;4]));;
+  
 
