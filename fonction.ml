@@ -1,4 +1,4 @@
-open Polynome ;;
+(*open Polynome ;;*)
 let rearrangements (l : polynome ref) (p : int) (r : int) : int =
   let t = Array.of_list !l in  
   let v = snd t.(r) in            

@@ -1,5 +1,5 @@
-open Polynome ;;
-open Fonction ;;
+(*open Polynome ;;
+open Fonction ;;*)
 (*1.2 exercice 1.5 à 1.7*)
 
 (*exercice 1.5*)
@@ -46,7 +46,7 @@ let rec verifArbre (a:expression):bool= (* passe pas pour l'instant *)
     |[]->true
     |h::t -> verifArbre h && iter t 
   in match a with 
-    |Int(x) -> if x<0 then false else true 
+    |Int(x) -> true
     |Pow(c,x) -> c='x' && x>=0
     |Mult(t) -> (taille_liste t)>=2 && (voitMult t) && iter t
     |Plus(t) -> (taille_liste t)>=2 && (voitPlus t) && iter t
