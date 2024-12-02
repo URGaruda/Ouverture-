@@ -80,3 +80,22 @@ let rec generate_expr (n:int) : expression list =
   else (gen_arb (etiquetage (abr (gen_permutation 20 ) )))::generate_expr (n-1)
 ;;
 
+(*2.14*)
+
+let somme_abr (a:expression list) : polynome = 
+  let rec somme_poly (l:polynome list ) : polynome =
+    match l with 
+    |[]->[]
+    |h::[]-> h
+    |h::i::t -> somme_poly((poly_add h i)::t )
+  in 
+  let rec list_to_canonique (b:expression list) : polynome list =
+    match b with 
+    |[]->[]
+    |h::t-> (canonique (arb2poly h) )::list_to_canonique t
+
+  in somme_poly (list_to_canonique a )
+;;
+
+
+
