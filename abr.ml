@@ -49,13 +49,13 @@ let gen_arb (e:expression) : expression =
     |h::t -> if n='M' then match h with
                           |Int(x)-> Int(x) :: recherche_expression t n 
                           |Pow(c,x)-> Pow(c,x) ::  recherche_expression t n 
-                          |Plus(v)-> Plus( recherche_expression v n) :: recherche_expression t n 
+                          |Plus(v)-> Plus( recherche_expression v 'P') :: recherche_expression t n 
                           |Mult(v)-> recherche_expression v n @ recherche_expression t n 
               else match h with 
                           |Int(x)-> Int(x) :: recherche_expression t n 
                           |Pow(c,x)-> Pow(c,x) ::  recherche_expression t n 
                           |Plus(v)-> recherche_expression v n @ recherche_expression t n 
-                          |Mult(v)-> Mult( recherche_expression v n ) :: recherche_expression t n 
+                          |Mult(v)-> Mult( recherche_expression v 'M' ) :: recherche_expression t n 
   
   in match e with 
   |Int(x)->Int(x)
