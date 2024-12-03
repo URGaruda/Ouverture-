@@ -224,18 +224,24 @@ let methode1 =
 
 
   
-(**Maniere recursive**)
+(**Maniere recursive ne fonctionne pas **)
 let rec prod (l: polynome list) (acc:polynome)=
   match l with
   |[]-> acc
   |a::tl -> prod tl (poly_prod a acc) in prod methode1 [(1,0)];;
 
   
-(*Maniere iterative**)
+(*Maniere iterative ne fonctionne pas**)
 let prod_iter (l: polynome list) : polynome =
   List.fold_left poly_prod [(1, 0)] l ;;
 
 prod_iter methode1;;
+(**addition fonctionne**)
+let rec add (l:polynome list) (acc:polynome): polynome=
+  match l with
+  |[]-> acc
+  |a::tl-> add tl (poly_add a acc) in add methode1 [(0,0)];;
+
 
 
 
