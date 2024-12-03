@@ -240,15 +240,17 @@ prod_iter methode1;;
 
 
 
-(**addition fonctionne recursive**)
-let rec add (l:polynome list) (acc:polynome): polynome=
+(**addition fonctionne,recursive**)
+let rec addr (l:polynome list) (acc:polynome): polynome=
   match l with
   |[]-> acc
-  |a::tl-> add tl (poly_add a acc) in add methode1 [(0,0)];;
+  |a::tl-> addr tl (poly_add a acc) in addr methode1 [(0,0)];;
 
+(**addition fonctionne, iterative**)
+let addi (l: polynome list) : polynome =
+  List.fold_left poly_add [(0, 0)] l ;;
 
-
-
+addi methode1;;
 
 
             
