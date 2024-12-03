@@ -97,5 +97,71 @@ let somme_abr (a:expression list) : polynome =
   in somme_poly (list_to_canonique a )
 ;;
 
+let mult_abr (a:expression list) : polynome = 
+  let rec mult_poly (l:polynome list ) : polynome =
+    match l with 
+    |[]->[]
+    |h::[]-> h
+    |h::i::t -> mult_poly((poly_prod h i)::t )
+  in 
+  let rec list_to_canonique (b:expression list) : polynome list =
+    match b with 
+    |[]->[]
+    |h::t-> (canonique (arb2poly h) )::list_to_canonique t
+
+  in mult_poly (list_to_canonique a )
+;;
+
+(*experimentation de fati*)
+let start_time=Sys.time ();;
+
+let methode1 =
+  let perm = let rec tab acc i = 
+               if i=0 then acc
+               else
+                 tab ((gen_permutation 20)::acc) (i-1) in tab [] 1000
+  in 
+  let abr=  let rec arbre acc tabr =
+              match acc with
+              |[]-> tabr
+              |a::tl-> arbre tl ((abr a)::tabr) in arbre perm [] in 
+  
+  let et =let rec etiq acc tab=
+            match acc with
+            |[]-> tab
+            |a::tl-> etiq tl ((etiquetage a)::tab) in etiq abr [] in
+
+  let g=let rec gen acc tab=
+          match acc with
+          |[]-> tab
+          |a::tl-> gen tl ((gen_arb a)::tab) in gen et [] in 
+  
+  let rec poly2 acc tab=
+    match acc with
+    |[]-> tab
+    |a::tl-> poly2 tl (( arb2poly a)::tab) in poly2 g [];;
+
+
+  
+(**Maniere recursive**)
+let rec prod (l: polynome list) (acc:polynome)=
+  match l with
+  |[]-> acc
+  |a::tl -> prod tl (poly_prod a acc) in prod methode1 [(1,0)];;
+
+  
+(*Maniere iterative**)
+
+let x = [(1,0)] ;;
+let prod_iter (l: polynome list) : polynome =
+  List.fold_left (fun x y -> poly_prod x y) x l ;;
+
+  prod_iter methode1;;
+
+let end_time = Sys.time ();;
+let elapsed_time = end_time -. start_time;;
+  
+Printf.printf "Le temps d'exécution est de %.4f secondes.\n" elapsed_time;;
+
 
 
