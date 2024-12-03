@@ -236,7 +236,11 @@ let prod_iter (l: polynome list) : polynome =
   List.fold_left poly_prod [(1, 0)] l ;;
 
 prod_iter methode1;;
-(**addition fonctionne**)
+
+
+
+
+(**addition fonctionne recursive**)
 let rec add (l:polynome list) (acc:polynome): polynome=
   match l with
   |[]-> acc
