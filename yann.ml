@@ -212,4 +212,40 @@ let abr (l:int list) : int tree =
   in List.fold_left (fun acc x -> insertion x acc) Empty l;;
 
 
-abr [4;2;3;8;1;9;6;7;5];;
+let test_abr = (abr [4;2;3;8;1;9;6;7;5]);;
+
+
+
+(* Question 1.11 *) 
+
+let rec etiquetage (abr:int tree) : expression = 
+  match abr with
+  | Empty -> if Random.float 1.0 < 0.5 then Int ((Random.int 401)-200) else Pow ('x', 1)
+  | Node(l, Empty, Empty) -> if l mod 2 = 1 then Mult [Int ((Random.int 401)-200); Pow ('x', 1)] else Pow ('x', Random.int 101)
+  | Node(l, g, d) -> if Random.float 1.0 < 0.75 then Plus [etiquetage g; etiquetage d] else Mult [etiquetage g; etiquetage d];;
+
+
+
+(* Question 1.12 *)
+
+let gen_arb (e:expression) : expression = 
+  
+  let rec aux (l:expression list) (n:char) : expression list =
+    match l with 
+    | [] -> []
+    | h::t -> match h with
+      | Int(x) -> Int(x)::(aux t n)
+      | Pow(c,x) -> Pow(c,x)::(aux t n) 
+      | Plus(v) -> if n = 'P' then (aux v n)@(aux t n) else Plus(aux v 'P')::(aux t n)
+      | Mult(v) -> if n = 'M' then (aux v n)@(aux t n) else Mult(aux v 'M')::(aux t n) 
+          
+  in match e with 
+  | Int(x) -> Int(x)
+  | Pow(c,x) -> Pow(c,x)
+  | Mult(t) -> Mult(aux t 'M')
+  | Plus(t) -> Plus(aux t 'P');;                                                                                 
+  
+
+let figure1 = Plus [ Mult [Int 123;Pow ('x',1)] ; Int 42 ; Pow ('x',3) ];;
+let figure_droite = Plus [Mult [ Int 123 ; Pow ('x',1)]; Plus [Int 42 ;Pow ('x',3)]] ;; 
+assert((gen_arb figure_droite) = figure1);;
