@@ -303,6 +303,13 @@ let gen_exp (n:int) (taille:int) : expression list =
 
 (* Question 2.14 *) 
 
+let time_execution f arg =
+  let start_time = Sys.time () in
+  let result = f arg in
+  let end_time = Sys.time () in
+  Printf.printf "Temps d'execution : %fs\n" (end_time -. start_time);
+  result;;
+
 let exp_somme1 (l: polynome list) : polynome =
   let rec aux (l:polynome list) (acc:polynome) : polynome =
     match l with
@@ -327,14 +334,6 @@ let exp_somme3 (l: polynome list) : polynome =
   
 
 let exp_somme (taille:int) =
-
-  let time_execution f arg =
-    let start_time = Sys.time () in
-    let result = f arg in
-    let end_time = Sys.time () in
-    Printf.printf "Temps d'execution : %fs\n" (end_time -. start_time);
-    result
-  in
 
   let rec aux (n:int) (pas:int) (max:int) =
       
