@@ -359,7 +359,7 @@ let exp_somme (taille:int) =
 
     if n < max then aux (n + pas) pas max f
 
-  in aux 10 100 1000 "exp_somme1.txt";;
+  in aux 10 100 1000 "exp_somme.txt";;
   
 (*exp_somme 20;;*)
 
@@ -459,6 +459,6 @@ let exp_produit (taille:int) =
   
     if n < max then aux (n + pas) pas max f
   
-  in aux 100 100 1000 "exp_produit10.txt";;
+  in aux 100 100 1000 "exp_produit.txt";;
   
-exp_produit 20;;
+(*exp_produit 20;;*)
