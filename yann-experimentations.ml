@@ -323,8 +323,7 @@ let exp_somme3 (l: polynome list) : polynome =
           acc := poly_add a !acc;
           remaining := tl
     done;
-    !acc
-  ;;
+    !acc;;
   
 
 let exp_somme (taille:int) =
@@ -355,8 +354,4 @@ let exp_somme (taille:int) =
 
   in aux 100 100 1000;;
 
-
 exp_somme 20;;
-
-
-
