@@ -393,7 +393,7 @@ let exp_produit2 (l: polynome list) : polynome =
 let exp_produit3 (l: polynome list) : polynome =
   canonique(List.fold_left poly_prod2 [(1,0)] l);;
 
-(* Stratégie naïve ittérative *)
+(* Stratégie naïve itérative *)
 let exp_produit4 (l: polynome list) : polynome =
   let acc = ref [(1,0)] in 
   let remaining = ref l in  
