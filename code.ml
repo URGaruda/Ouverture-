@@ -291,11 +291,11 @@ let () =
 
 (* Question 2.13 *) 
 
-let gen_exp (n:int) : expression list =
+let gen_exp (n:int) (taille:int) : expression list =
   
   let rec gen_permutations n =
     if n <= 0 then []
-    else (gen_permutation 20) :: (gen_permutations (n - 1))
+    else (gen_permutation taille) :: (gen_permutations (n - 1))
 
   in List.map gen_arb (List.map etiquetage (List.map abr (gen_permutations n)));;
 
