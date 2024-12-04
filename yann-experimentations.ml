@@ -303,54 +303,169 @@ let gen_exp (n:int) (taille:int) : expression list =
 
 (* Question 2.14 *) 
 
-let time_execution f arg =
+let time_execution fct arg f =
+  let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
   let start_time = Sys.time () in
-  let result = f arg in
+  let result = fct arg in
   let end_time = Sys.time () in
-  Printf.printf "Temps d'execution : %fs\n" (end_time -. start_time);
+  let duration = end_time -. start_time in
+  Printf.fprintf file "%f;" duration;
+  Printf.printf "Temps d'execution : %fs\n" duration;
+  close_out file;
   result;;
 
+
+(* Stratégie naïve récursive *)
 let exp_somme1 (l: polynome list) : polynome =
   let rec aux (l:polynome list) (acc:polynome) : polynome =
     match l with
     | [] -> acc
     | a :: tl -> aux tl (poly_add a acc) 
-  in aux l [];;
+  in aux l [];;  
 
+(* Stratégie avec List.fold_left *)
 let exp_somme2 (l: polynome list) : polynome =
   List.fold_left poly_add [] l;;
 
+(* Stratégie naïve itérative *)
 let exp_somme3 (l: polynome list) : polynome =
-  let acc = ref [] in
+  let result = ref [] in
   let remaining = ref l in
     while !remaining <> [] do
       match !remaining with
       | [] -> ()
       | a :: tl ->
-          acc := poly_add a !acc;
+        result := poly_add a !result;
           remaining := tl
     done;
-    !acc;;
+    !result;;
   
 
 let exp_somme (taille:int) =
 
-  let rec aux (n:int) (pas:int) (max:int) =
+  let rec aux (n:int) (pas:int) (max:int) (f:string) =
       
+    let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
+    Printf.fprintf file "%d;" n;
+    close_out file;
+
     Printf.printf "\nn = %d\n" n;
 
     let exp_abr = gen_exp n taille in
     let exp_poly = List.map arb2poly exp_abr in
 
-    let somme1 = time_execution exp_somme1 exp_poly in
-    let somme2 = time_execution exp_somme2 exp_poly in
-    let somme3 = time_execution exp_somme3 exp_poly in
+    let somme1 = time_execution exp_somme1 exp_poly f in
+    let somme2 = time_execution exp_somme2 exp_poly f in
+    let somme3 = time_execution exp_somme3 exp_poly f in
+
+    let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
+    Printf.fprintf file "\t%d;" (List.length somme1);
+    Printf.fprintf file "%d;" (List.length somme2);
+    Printf.fprintf file "%d\n" (List.length somme3);
+    close_out file;
+
+    if n < max then aux (n + pas) pas max f
+
+  in aux 10 100 1000 "exp_somme1.txt";;
+  
+(*exp_somme 20;;*)
+
+
+
+(* Question 2.14 *) 
+
+(* Stratégie naïve récursive 1 *)
+let exp_produit1 (l: polynome list) : polynome =
+  let rec aux (l:polynome list) (acc:polynome) : polynome =
+    match l with
+    | [] -> acc
+    | a :: tl -> aux tl (poly_prod a acc) 
+  in aux l [(1,0)];;
+
+(* Stratégie naïve récursive 2 *)
+let exp_produit2 (l: polynome list) : polynome =
+  
+  let poly_prod_bis (p1:polynome) (p2:polynome) : polynome = 
+    let monome_prod (m:monome) (p:polynome) = 
+      List.map (fun (c, d) -> (c * (fst m), d + (snd m))) p 
+    in (List.fold_left (fun acc mon -> poly_add acc (monome_prod mon p2)) [] p1)
+
+  in let rec aux (l:polynome list) (acc:polynome) : polynome =
+    match l with
+    | [] -> acc
+    | a :: tl -> aux tl (poly_prod_bis a acc)
+  in canonique(aux l [(1,0)]);;
+
+(* Stratégie avec List.fold_left *)
+let exp_produit3 (l: polynome list) : polynome =
+  canonique(List.fold_left poly_prod2 [(1,0)] l);;
+
+(* Stratégie naïve ittérative *)
+let exp_produit4 (l: polynome list) : polynome =
+  let acc = ref [(1,0)] in 
+  let remaining = ref l in  
+  while !remaining <> [] do
+    match !remaining with
+    | [] -> ()
+    | a :: tl -> 
+      acc := poly_prod a !acc; 
+      remaining := tl 
+  done;
+  !acc;;
+
+(* Stratégie diviser pour reigner *)
+let split_at (index:int) (l: polynome list) =
+  let rec aux i acc1 acc2 = function
+    | [] -> (List.rev acc1, List.rev acc2)
+    | x :: xs when i < index -> aux (i + 1) (x :: acc1) acc2 xs
+    | x :: xs -> aux (i + 1) acc1 (x :: acc2) xs
+  in
+  aux 0 [] [] l;;
+let rec exp_produit5 (l: polynome list) : polynome =
+  match l with
+  | [] -> [] 
+  | [a] -> a
+  | _ ->
+    let mid = List.length l / 2 in
+    let (l1, l2) = split_at mid l in
+    let p1 = exp_produit5 l1 in
+    let p2 = exp_produit5 l2 in
+    poly_prod p1 p2;;
+
+
+let exp_produit (taille:int) =
+
+  let rec aux (n:int) (pas:int) (max:int) (f:string) =
     
-    assert (somme1 = somme2);
-    assert (somme2 = somme3);
+    let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
+    Printf.fprintf file "%d;" n;
+    close_out file;
 
-    if n < max then aux (n + pas) pas max
+    Printf.printf "\nn = %d\n" n;
+  
+    let exp_abr = gen_exp n taille in
+    let exp_poly = List.map arb2poly exp_abr in
+  
+    let produit1 = time_execution exp_produit1 exp_poly f in
+    let produit2 = time_execution exp_produit2 exp_poly f in
+    (*let produit3 = time_execution exp_produit3 exp_poly f in*)
+    let produit4 = time_execution exp_produit4 exp_poly f in
+    let produit5 = time_execution exp_produit5 exp_poly f in
 
-  in aux 100 100 1000;;
+    let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
+    Printf.fprintf file "\t%d;" (List.length produit1);
+    Printf.fprintf file "%d;\n" (List.length produit2);
+    Printf.fprintf file "%d;" (List.length produit4);
+    Printf.fprintf file "%d\n" (List.length produit5);
+    close_out file;
 
-exp_somme 20;;
+    (*assert (produit1 = produit2);
+    assert (produit1 = produit3);
+    assert (produit1 = produit4);
+    assert (produit1 = produit5);*)
+  
+    if n < max then aux (n + pas) pas max f
+  
+  in aux 100 100 1000 "exp_produit10.txt";;
+  
+exp_produit 20;;
