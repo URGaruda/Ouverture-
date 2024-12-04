@@ -74,19 +74,12 @@ let () =
 
 (* Question 1.4 *)
 
-let poly_prod (p1:polynome) (p2:polynome) : polynome =
+let poly_prod (p1:polynome) (p2:polynome) : polynome = 
   
-  let rec monome_prod (m:monome) (p:polynome) : polynome = 
-    match p with
-    | [] -> []
-    | (c,d) :: t -> (c*(fst m), d+(snd m)) :: (monome_prod m t)
-  
-  in let rec aux (p1:polynome) (p2:polynome) : polynome  = 
-    match p1 with
-    | []-> [] 
-    | m1 :: t1 -> (monome_prod m1 p2) @ (aux t1 p2)
-  
-  in canonique (aux p1 p2);; 
+  let monome_prod (m:monome) (p:polynome) = 
+    List.map (fun (c, d) -> (c * (fst m), d + (snd m))) p 
+      
+  in (canonique (List.fold_left (fun acc mon -> poly_add acc (monome_prod mon p2)) [] p1));;
 
 let () = 
   assert (poly_prod [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(484,0); (-374,1); (104,2); (-10,3)]);
