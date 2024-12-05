@@ -395,16 +395,16 @@ let exp_produit3 (l: polynome list) : polynome =
 
 (* Stratégie naïve itérative *)
 let exp_produit4 (l: polynome list) : polynome =
-  let acc = ref [(1,0)] in 
+  let result = ref [(1,0)] in 
   let remaining = ref l in  
   while !remaining <> [] do
     match !remaining with
     | [] -> ()
     | a :: tl -> 
-      acc := poly_prod a !acc; 
+      result := poly_prod a !result; 
       remaining := tl 
   done;
-  !acc;;
+  !result;;
 
 (* Stratégie diviser pour reigner *)
 let split_at (index:int) (l: polynome list) =
@@ -447,7 +447,7 @@ let exp_produit (taille:int) =
 
     let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
     Printf.fprintf file "\t%d;" (List.length produit1);
-    Printf.fprintf file "%d;\n" (List.length produit2);
+    Printf.fprintf file "%d;" (List.length produit2);
     Printf.fprintf file "%d;" (List.length produit4);
     Printf.fprintf file "%d\n" (List.length produit5);
     close_out file;
