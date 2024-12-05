@@ -391,7 +391,7 @@ let exp_produit2 (l: polynome list) : polynome =
 
 (* Stratégie avec List.fold_left *)
 let exp_produit3 (l: polynome list) : polynome =
-  canonique(List.fold_left poly_prod2 [(1,0)] l);;
+  List.fold_left poly_prod [(1,0)] l;;
 
 (* Stratégie naïve itérative *)
 let exp_produit4 (l: polynome list) : polynome =
