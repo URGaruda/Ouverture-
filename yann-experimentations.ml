@@ -406,7 +406,7 @@ let exp_produit4 (l: polynome list) : polynome =
   done;
   !result;;
 
-(* Stratégie diviser pour reigner *)
+(* Stratégie diviser pour régner *)
 let split_at (index:int) (l: polynome list) =
   let rec aux i acc1 acc2 = function
     | [] -> (List.rev acc1, List.rev acc2)
