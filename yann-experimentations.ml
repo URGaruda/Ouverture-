@@ -292,21 +292,24 @@ let gen_exp (n:int) (taille:int) : expression list =
 
   in List.map gen_arb (List.map etiquetage (List.map abr (gen_permutations n)));;
 
+let gen_exp_20 (n:int) : expression list = 
+  gen_exp n 20;;
+
 
 
 (* Question 2.14 *) 
 
-let time_execution fct arg f =
+let time_execution fct arg f is_end =
   let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
   let start_time = Sys.time () in
   let result = fct arg in
   let end_time = Sys.time () in
   let duration = end_time -. start_time in
-  Printf.fprintf file "%f;" duration;
+  Printf.fprintf file "%f:%d" duration (List.length result);
+  if is_end then Printf.fprintf file "\n" else Printf.fprintf file ";";
   Printf.printf "Temps d'execution : %fs\n" duration;
   close_out file;
   result;;
-
 
 (* Stratégie naïve récursive *)
 let exp_somme1 (l: polynome list) : polynome =
@@ -332,7 +335,16 @@ let exp_somme3 (l: polynome list) : polynome =
           remaining := tl
     done;
     !result;;
-  
+
+
+let exp_test_polys = [[(5,0); (1,1); (8,2); (12,3)]; [(7,0); (3,1); (2,2); (8,3)]; [(5,0); (1,1); (3,2); (6,3); (2,4)]];;
+let exp_test_polys_add = [(17,0); (5,1); (13,2); (26,3); (2,4)];;
+
+let () =
+  assert(exp_somme1 exp_test_polys = exp_test_polys_add);
+  assert(exp_somme2 exp_test_polys = exp_test_polys_add);
+  assert(exp_somme3 exp_test_polys = exp_test_polys_add);;
+
 
 let exp_somme (taille:int) =
 
@@ -344,24 +356,22 @@ let exp_somme (taille:int) =
 
     Printf.printf "\nn = %d\n" n;
 
-    let exp_abr = gen_exp n taille in
+    let exp_abr = (gen_exp n taille) in
     let exp_poly = List.map arb2poly exp_abr in
 
-    let somme1 = time_execution exp_somme1 exp_poly f in
-    let somme2 = time_execution exp_somme2 exp_poly f in
-    let somme3 = time_execution exp_somme3 exp_poly f in
+    let somme1 = time_execution exp_somme1 exp_poly f false in
+    let somme2 = time_execution exp_somme2 exp_poly f false in
+    let somme3 = time_execution exp_somme3 exp_poly f true in
 
-    let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
-    Printf.fprintf file "\t%d;" (List.length somme1);
-    Printf.fprintf file "%d;" (List.length somme2);
-    Printf.fprintf file "%d\n" (List.length somme3);
-    close_out file;
+    assert (somme1 = somme2);
+    assert (somme2 = somme3);
+    assert (List.length somme1 > 0);
 
     if n < max then aux (n + pas) pas max f
 
-  in aux 10 100 1000 "exp_somme.txt";;
+  in aux 100 100 1000 "exp_somme.txt";;
   
-(*exp_somme 20;;*)
+(* exp_somme 20;; *)
 
 
 
@@ -407,23 +417,38 @@ let exp_produit4 (l: polynome list) : polynome =
   !result;;
 
 (* Stratégie diviser pour régner *)
-let split_at (index:int) (l: polynome list) =
-  let rec aux i acc1 acc2 = function
-    | [] -> (List.rev acc1, List.rev acc2)
-    | x :: xs when i < index -> aux (i + 1) (x :: acc1) acc2 xs
-    | x :: xs -> aux (i + 1) acc1 (x :: acc2) xs
-  in
-  aux 0 [] [] l;;
-let rec exp_produit5 (l: polynome list) : polynome =
+let exp_produit5 (l: polynome list) : polynome =
+
+  let split_at (index:int) (l: polynome list) =
+    let rec aux i acc1 acc2 = function
+      | [] -> (List.rev acc1, List.rev acc2)
+      | x :: xs when i < index -> aux (i + 1) (x :: acc1) acc2 xs
+      | x :: xs -> aux (i + 1) acc1 (x :: acc2) xs
+    in
+    aux 0 [] [] l
+
+  in let rec divide_and_conquer (l: polynome list) : polynome =
   match l with
   | [] -> [] 
   | [a] -> a
   | _ ->
     let mid = List.length l / 2 in
-    let (l1, l2) = split_at mid l in
-    let p1 = exp_produit5 l1 in
-    let p2 = exp_produit5 l2 in
-    poly_prod p1 p2;;
+    let (l1, l2) = (split_at mid l) in
+    let p1 = divide_and_conquer l1 in
+    let p2 = divide_and_conquer l2 in
+    poly_prod p1 p2
+
+  in divide_and_conquer l;;
+
+
+let exp_test_polys_prod = [(175,0); (145,1); (472,2); (1095,3); (859,4); (1408,5); (1786,6); (1020,7); (936,8); (752,9); (192,10)];;
+
+let () =
+  assert (exp_produit1 exp_test_polys = exp_test_polys_prod);
+  assert (exp_produit2 exp_test_polys = exp_test_polys_prod);
+  assert (exp_produit3 exp_test_polys = exp_test_polys_prod);
+  assert (exp_produit4 exp_test_polys = exp_test_polys_prod);
+  assert (exp_produit5 exp_test_polys = exp_test_polys_prod);;
 
 
 let exp_produit (taille:int) =
@@ -439,26 +464,20 @@ let exp_produit (taille:int) =
     let exp_abr = gen_exp n taille in
     let exp_poly = List.map arb2poly exp_abr in
   
-    let produit1 = time_execution exp_produit1 exp_poly f in
-    let produit2 = time_execution exp_produit2 exp_poly f in
-    (*let produit3 = time_execution exp_produit3 exp_poly f in*)
-    let produit4 = time_execution exp_produit4 exp_poly f in
-    let produit5 = time_execution exp_produit5 exp_poly f in
+    let produit1 = time_execution exp_produit1 exp_poly f false in
+    let produit2 = time_execution exp_produit2 exp_poly f false in
+    (*let produit3 = time_execution exp_produit3 exp_poly f false in*)
+    let produit4 = time_execution exp_produit4 exp_poly f false in
+    let produit5 = time_execution exp_produit5 exp_poly f true in
 
-    let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
-    Printf.fprintf file "\t%d;" (List.length produit1);
-    Printf.fprintf file "%d;" (List.length produit2);
-    Printf.fprintf file "%d;" (List.length produit4);
-    Printf.fprintf file "%d\n" (List.length produit5);
-    close_out file;
-
-    (*assert (produit1 = produit2);
-    assert (produit1 = produit3);
+    assert (produit1 = produit2);
+    (*assert (produit1 = produit3);*)
     assert (produit1 = produit4);
-    assert (produit1 = produit5);*)
+    assert (produit1 = produit5);
+    assert (List.length produit1 > 0);
   
     if n < max then aux (n + pas) pas max f
   
   in aux 100 100 1000 "exp_produit.txt";;
   
-(*exp_produit 20;;*)
+(* exp_produit 20;; *)
