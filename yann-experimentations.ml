@@ -365,7 +365,7 @@ let exp_somme (taille:int) =
 
 
 
-(* Question 2.14 *) 
+(* Question 2.15 *) 
 
 (* Stratégie naïve récursive 1 *)
 let exp_produit1 (l: polynome list) : polynome =
