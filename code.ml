@@ -62,7 +62,7 @@ let poly_add p1 p2 =
   
   in let resultat = add p1 p2 [] 
     
-  in List.sort (fun (_, d1) (_, d2) -> compare d1 d2) resultat;;
+  in (canonique (List.sort (fun (_, d1) (_, d2) -> compare d1 d2) resultat));;
 
 let () = 
   assert (poly_add [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(44,0); (-17,1); (2,2)]);
