@@ -48,7 +48,7 @@ let poly_add (p1:polynome) (p2:polynome) : polynome =
 
   let rec aux (p1:polynome) (p2:polynome) (acc:polynome) : polynome =
     match p1, p2 with
-    | [], [] -> List.rev acc
+    | [], [] -> acc
     | (c1, d1) :: t1, [] -> aux t1 [] ((c1, d1) :: acc)
     | [], (c2, d2) :: t2 -> aux [] t2 ((c2, d2) :: acc) 
     | (c1, d1) :: t1, (c2, d2) :: t2 ->
