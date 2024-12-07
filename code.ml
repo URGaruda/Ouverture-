@@ -44,25 +44,19 @@ let () =
 
 (* Question 1.3 *)
 
-let poly_add p1 p2 =
+let poly_add (p1:polynome) (p2:polynome) : polynome =
 
-  let rec add p1 p2 acc =
+  let rec aux (p1:polynome) (p2:polynome) (acc:polynome) : polynome =
     match p1, p2 with
-    | [], [] -> acc 
-    | (c1, d1) :: t1, [] -> (c1, d1) :: acc @ t1  
-    | [], (c2, d2) :: t2 -> (c2, d2) :: acc @ t2  
-    | (c1, d1) :: t1, (c2, d2) :: t2 when d1 = d2 -> 
-      let new_coef = c1 + c2 in
-        if new_coef = 0 then add t1 t2 acc
-        else add t1 t2 ((new_coef, d1) :: acc)
-    | (c1, d1) :: t1, (c2, d2) :: t2 when d1 < d2 -> 
-      add t1 p2 ((c1, d1) :: acc)
-    | (c1, d1) :: t1, (c2, d2) :: t2 ->  
-      add p1 t2 ((c2, d2) :: acc)
-  
-  in let resultat = add p1 p2 [] 
+    | [], [] -> List.rev acc
+    | (c1, d1) :: t1, [] -> aux t1 [] ((c1, d1) :: acc)
+    | [], (c2, d2) :: t2 -> aux [] t2 ((c2, d2) :: acc) 
+    | (c1, d1) :: t1, (c2, d2) :: t2 ->
+      if d1 = d2 then aux t1 t2 ((c1 + c2, d1) :: acc)
+      else if d1 < d2 then aux t1 p2 ((c1, d1) :: acc)
+      else aux p1 t2 ((c2, d2) :: acc)
     
-  in (canonique (List.sort (fun (_, d1) (_, d2) -> compare d1 d2) resultat));;
+  in (canonique (aux p1 p2 []));;
 
 let () = 
   assert (poly_add [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(44,0); (-17,1); (2,2)]);
