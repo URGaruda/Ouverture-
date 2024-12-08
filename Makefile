@@ -2,8 +2,8 @@ PROGRAMS = exp
 
 all: $(PROGRAMS)
 
-exp: yann_experimentations.ml
-	ocamlc -o projet yann_experimentations.ml 
+exp: code_final.ml
+	ocamlc -o projet code_final.ml
 
 clean:
 	rm -f *.cmo *.cmi $(PROGRAMS)
