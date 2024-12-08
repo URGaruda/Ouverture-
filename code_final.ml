@@ -222,9 +222,12 @@ let gen_permutation (n:int) : int list =
     else ([], p)
   
   in let per = snd (aux (gen_liste 1) []) in 
+
+  (* Debug : export des permutations dans un fichier *)
   (*let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "export/gen_permutation.txt" in
   Printf.fprintf file "Generation des permutations pour n=%d :\n%s\n\n" n (String.concat ";" (List.map string_of_int per));
   close_out file;*)
+
   per;;
 
 
@@ -508,7 +511,7 @@ let rec exper_gen_abr_15 (pow_max:int) : expression list =
   
   in (aux (-1) pow_max);;
 
-let exper_polys_15 = List.map arb2poly (exper_gen_abr_15 13);;
+(*let exper_polys_15 = List.map arb2poly (exper_gen_abr_15 13);;*)
 
 
 
