@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 
-# Courbes pour les résultats de la 2.13 
+# Courbes pour les résultats de la 2.13 et 2.16
 
+"""
 iterations = []
 durations = []
 file= open("exper_13_14_15/exper_gen_abrs_20.txt","r")
@@ -25,9 +26,12 @@ plt.ylabel("Itérations")
 plt.xlabel("Durée")
 plt.show()
 file.close()
-# Courbes pour les résultats de la 2.14 
+"""
 
 
+# Courbes pour les résultats de la 2.14
+
+"""
 iterations = []
 durations = []
 taille_liste = []
@@ -74,9 +78,11 @@ plt.show()
 #plt.ylabel("taille du polynome")
 #plt.show()
 file.close()
+"""
 
 
 #  Courbes pour les résultats de la 2.15
+
 """
 iterations = []
 durations = []
@@ -124,4 +130,5 @@ plt.legend()
 plt.xlabel("Itérations")
 plt.ylabel("taille du polynome")
 plt.show()
-file.close()"""
+file.close()
+"""
