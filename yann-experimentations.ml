@@ -284,7 +284,7 @@ let () =
 
 let exper_gen_abrs (n:int) (taille:int) : expression list =
   
-  let rec gen_permutations n =
+  let rec gen_permutations (n:int) =
     if n <= 0 then []
     else (gen_permutation taille) :: (gen_permutations (n - 1))
 
