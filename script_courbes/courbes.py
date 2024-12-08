@@ -8,7 +8,7 @@ import matplotlib.cm as cm
 
 iterations = []
 durations = []
-file= open("exemples_fichiers_export/exemple_fichier_2.13.txt","r")
+file= open("exper_16_17_18_19/exper_gen_abr_15.txt","r")
 lines = file.readlines()
 for line in lines:
     res=line.strip().split(":")
@@ -18,19 +18,20 @@ for line in lines:
     durations.append(float(tps))
 
 couleur=cm.tab20(np.linspace(0, 1, 20)) 
-plt.plot(iterations,durations,label=f"etiquetage",color=couleur[random.randint(0,19)])
+plt.plot(durations,iterations,label=f"etiquetage",color=couleur[random.randint(0,19)])
     
 plt.legend()
-plt.xlabel("Itérations")
-plt.ylabel("Durée")
+plt.ylabel("Itérations")
+plt.xlabel("Durée")
 plt.show()
 file.close()
 # Courbes pour les résultats de la 2.14 
 
+"""
 iterations = []
 durations = []
 taille_liste = []
-file = open('exemples_fichiers_export/exemple_fichier_2.14.txt', "r")
+file = open('exper_16_17_18_19/exper_somme_15_2.txt', "r")
 lines = file.readlines()
 for line in lines:
     res=line.strip().split(":")
@@ -56,31 +57,31 @@ fct_len = len_array.T.tolist()
 couleur=cm.tab20(np.linspace(0, 1, len(fct_len))) 
 
 for i,(ls_tps,ls_len,c) in enumerate(zip(fct_tps,fct_len,couleur)):
-    plt.plot(iterations,ls_tps,label=f"exp_somme{i+1}",color=c)
+    #plt.plot(ls_tps,iterations,label=f"exp_somme{i+1}",color=c)
+    #plt.scatter(iterations,ls_len,label=f"exp_somme{i+1}",color=c)
+    plt.scatter(ls_tps,iterations,label=f"exp_somme{i+1}",color=c)
+plt.legend()
+plt.ylabel("Itérations")
+plt.xlabel("Durée")
+plt.show()
+
+#for i,(ls_len,c) in enumerate(zip(fct_len,couleur)):
+    #plt.plot(iterations,ls_tps,label=f"exp_somme{i+1}",color=c)
     #plt.scatter(iterations,ls_len,label=f"taille du polynôme pour exp_somme{i+1}",color=c)
 
-plt.legend()
-plt.xlabel("Itérations")
-plt.ylabel("Durée")
-plt.show()
-
-for i,(ls_len,c) in enumerate(zip(fct_len,couleur)):
-    #plt.plot(iterations,ls_tps,label=f"exp_somme{i+1}",color=c)
-    plt.scatter(iterations,ls_len,label=f"taille du polynôme pour exp_somme{i+1}",color=c)
-
-plt.legend()
-plt.xlabel("Itérations")
-plt.ylabel("taille du polynome")
-plt.show()
+#plt.legend()
+#plt.xlabel("Itérations")
+#plt.ylabel("taille du polynome")
+#plt.show()
 file.close()
-
+"""
 
 #  Courbes pour les résultats de la 2.15
 """
 iterations = []
 durations = []
 taille_liste = []
-file = open('exp_produit.txt', "r")
+file = open('exper_16_17_18_19/exper_produit_15_2.txt', "r")
 lines = file.readlines()
 for line in lines:
     res=line.strip().split(":")
@@ -106,12 +107,13 @@ fct_len = len_array.T.tolist()
 couleur=cm.tab20(np.linspace(0, 1, len(fct_len))) 
 
 for i,(ls_tps,ls_len,c) in enumerate(zip(fct_tps,fct_len,couleur)):
-    plt.plot(iterations,ls_tps,label=f"exp_produit{i+1}",color=c)
+    #plt.plot(ls_tps,iterations,label=f"exp_produit{i+1}",color=c)
     #plt.scatter(iterations,ls_len,label=f"taille du polynôme pour exp_somme{i+1}",color=c)
+    plt.scatter(ls_tps,iterations,label=f"exp_produit{i+1}",color=c)
 
 plt.legend()
-plt.xlabel("Itérations")
-plt.ylabel("Durée")
+plt.xlabel("Durée")
+plt.ylabel("Itérations")
 plt.show()
 
 for i,(ls_len,c) in enumerate(zip(fct_len,couleur)):
