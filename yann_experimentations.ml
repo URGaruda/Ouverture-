@@ -532,4 +532,3 @@ let rec exper_gen_abr_15 (pow_max:int) : expression list =
 (* Question 2.18 *)
 
 (*let exper_produit_15 = exper_produit [exper_polys_15] "exp_produit_15.txt" false;;*)
-

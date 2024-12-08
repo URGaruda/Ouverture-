@@ -8,7 +8,7 @@ import matplotlib.cm as cm
 
 iterations = []
 durations = []
-file= open("exper_gen_abrs_20.txt","r")
+file= open("exemples_fichiers_export/exemple_fichier_2.13.txt","r")
 lines = file.readlines()
 for line in lines:
     res=line.strip().split(":")
@@ -30,7 +30,7 @@ file.close()
 iterations = []
 durations = []
 taille_liste = []
-file = open('exp_somme.txt', "r")
+file = open('exemples_fichiers_export/exemple_fichier_2.14.txt', "r")
 lines = file.readlines()
 for line in lines:
     res=line.strip().split(":")
