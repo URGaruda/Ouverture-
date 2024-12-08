@@ -46,17 +46,19 @@ let () =
 
 let poly_add (p1:polynome) (p2:polynome) : polynome =
 
-  let rec aux (p1:polynome) (p2:polynome) (acc:polynome) : polynome =
+  let rec aux (p1:polynome) (p2:polynome) : polynome =
     match p1, p2 with
-    | [], [] -> acc
-    | (c1, d1) :: t1, [] -> aux t1 [] ((c1, d1) :: acc)
-    | [], (c2, d2) :: t2 -> aux [] t2 ((c2, d2) :: acc) 
-    | (c1, d1) :: t1, (c2, d2) :: t2 ->
-      if d1 = d2 then aux t1 t2 ((c1 + c2, d1) :: acc)
-      else if d1 < d2 then aux t1 p2 ((c1, d1) :: acc)
-      else aux p1 t2 ((c2, d2) :: acc)
-    
-  in (canonique (aux p1 p2 []));;
+    | [], [] -> []
+    | [], p2 -> p2
+    | p1, [] -> p1
+    | (c1, d1)::t1, (c2, d2)::t2 ->
+      if d1 = d2 then
+        let sum = c1 + c2 in
+        if sum = 0 then aux t1 t2 else (sum, d1) :: aux t1 t2
+      else if d1 < d2 then (c1, d1) :: aux t1 p2
+      else (c2, d2) :: aux p1 t2
+
+  in ((aux p1 p2));;
 
 let () = 
   assert (poly_add [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(44,0); (-17,1); (2,2)]);
