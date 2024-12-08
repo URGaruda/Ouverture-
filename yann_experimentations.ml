@@ -44,25 +44,26 @@ let () =
 
 (* Question 1.3 *)
 
-let poly_add (p1:polynome) (p2:polynome) : polynome =
+let rec poly_add (p1:polynome) (p2:polynome) : polynome =
+  match p1, p2 with
+  | [], [] -> []
+  | [], p2 -> p2
+  | p1, [] -> p1
+  | (c1, d1)::t1, (c2, d2)::t2 ->
+    if d1 = d2 then
+      let sum = c1 + c2 in
+      if sum = 0 then poly_add t1 t2 else (sum, d1) :: poly_add t1 t2
+    else if d1 < d2 then (c1, d1) :: poly_add t1 p2
+    else (c2, d2) :: poly_add p1 t2;;
 
-  let rec aux (p1:polynome) (p2:polynome) (acc:polynome) : polynome =
-    match p1, p2 with
-    | [], [] -> acc
-    | (c1, d1) :: t1, [] -> aux t1 [] ((c1, d1) :: acc)
-    | [], (c2, d2) :: t2 -> aux [] t2 ((c2, d2) :: acc) 
-    | (c1, d1) :: t1, (c2, d2) :: t2 ->
-      if d1 = d2 then aux t1 t2 ((c1 + c2, d1) :: acc)
-      else if d1 < d2 then aux t1 p2 ((c1, d1) :: acc)
-      else aux p1 t2 ((c2, d2) :: acc)
-    
-  in (canonique (aux p1 p2 []));;
+let poly_add_canonique (p1:polynome) (p2:polynome) : polynome =
+  (canonique (poly_add p1 p2));;
 
 let () = 
-  assert (poly_add [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(44,0); (-17,1); (2,2)]);
-  assert (poly_add (canonique poly1) (canonique poly2) = [(44,0); (-17,1); (2,2)]);
-  assert (poly_add (canonique poly1) (canonique poly3) = [(22,0); (-7,1); (2,2)]);
-  assert (poly_add (canonique poly4) (canonique poly5) = canonique poly4);;
+  assert (poly_add_canonique [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(44,0); (-17,1); (2,2)]);
+  assert (poly_add_canonique (canonique poly1) (canonique poly2) = [(44,0); (-17,1); (2,2)]);
+  assert (poly_add_canonique (canonique poly1) (canonique poly3) = [(22,0); (-7,1); (2,2)]);
+  assert (poly_add_canonique (canonique poly4) (canonique poly5) = canonique poly4);;
 
 
 
@@ -73,13 +74,16 @@ let poly_prod (p1:polynome) (p2:polynome) : polynome =
   let monome_prod (m:monome) (p:polynome) = 
     List.map (fun (c, d) -> (c * (fst m), d + (snd m))) p 
       
-  in (canonique (List.fold_left (fun acc mon -> poly_add acc (monome_prod mon p2)) [] p1));;
+  in (List.fold_left (fun acc mon -> poly_add acc (monome_prod mon p2)) [] p1);;
+
+let poly_prod_canonique (p1:polynome) (p2:polynome) : polynome =
+  (canonique (poly_prod p1 p2));;
 
 let () = 
-  assert (poly_prod [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(484,0); (-374,1); (104,2); (-10,3)]);
-  assert (poly_prod (canonique poly1) (canonique poly2) = [(484,0); (-374,1); (104,2); (-10,3)]);
-  assert (poly_prod (canonique poly1) (canonique poly3) = [(110,1); (-60,2); (10,3)]);
-  assert (poly_prod (canonique poly4) (canonique poly5) = []);;
+  assert (poly_prod_canonique [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(484,0); (-374,1); (104,2); (-10,3)]);
+  assert (poly_prod_canonique (canonique poly1) (canonique poly2) = [(484,0); (-374,1); (104,2); (-10,3)]);
+  assert (poly_prod_canonique (canonique poly1) (canonique poly3) = [(110,1); (-60,2); (10,3)]);
+  assert (poly_prod_canonique (canonique poly4) (canonique poly5) = []);;
 
 
 
@@ -115,7 +119,7 @@ let arb2poly (exp:expression) : polynome =
       | (h :: t) -> match h with
       | Int value -> (mult2poly t (value * fst m, snd m) false)
       | Pow (var, value) -> let p = (testPow (var, value)) in (mult2poly t (fst m, snd p + snd m) false)
-      | Plus list -> poly_prod (plus2poly list true) (mult2poly t (fst m, snd m) false)
+      | Plus list -> poly_prod_canonique (plus2poly list true) (mult2poly t (fst m, snd m) false)
       | Mult _ -> raise (Invalid_argument "Un produit ne peut pas contenir de produits") 
                
   and plus2poly (l:expression list) (is_first_exp:bool) : polynome = 
@@ -216,8 +220,10 @@ let gen_permutation (n:int) : int list =
     if List.length l > 0 
     then let extr = (extraction_alea l p) in (aux (fst extr) (snd extr))
     else ([], p)
+  
   in let per = snd (aux (gen_liste 1) []) in 
   (*let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "gen_permutation.txt" in
+  in snd (aux (gen_liste 1) []);;
   Printf.fprintf file "%d:%s\n" n (String.concat ";" (List.map string_of_int per));
   close_out file;*)
   per;;
@@ -293,7 +299,7 @@ let exper_gen_abrs (n:int) (taille:int) : expression list =
 let rec exper_gen_abrs_20 (n:int) (pas:int) (max:int) : expression list list =
   if n > max then []
   else 
-    let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "exper_gen_abrs_20.txt" in
+    let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "export/exper_gen_abrs_20.txt" in
     let start_time = Sys.time () in
     let exper_abr = (exper_gen_abrs n 20) in
     let end_time = Sys.time () in
@@ -327,12 +333,12 @@ let exper_somme1 (l: polynome list) : polynome =
   let rec aux (l:polynome list) (acc:polynome) : polynome =
     match l with
     | [] -> acc
-    | a :: tl -> aux tl (poly_add a acc) 
+    | a :: tl -> aux tl (poly_add_canonique a acc) 
   in aux l [];;  
 
 (* Stratégie avec List.fold_left *)
 let exper_somme2 (l: polynome list) : polynome =
-  List.fold_left poly_add [] l;;
+  List.fold_left poly_add_canonique [] l;;
 
 (* Stratégie naïve itérative *)
 let exper_somme3 (l: polynome list) : polynome =
@@ -342,7 +348,7 @@ let exper_somme3 (l: polynome list) : polynome =
       match !remaining with
       | [] -> ()
       | a :: tl ->
-        result := poly_add a !result;
+        result := poly_add_canonique a !result;
           remaining := tl
     done;
     !result;;
@@ -377,7 +383,7 @@ let rec exper_somme (pll:polynome list list) (f:string) =
   
     exper_somme l f;;     
         
-(*(exper_somme exper_polys "exp_somme.txt");;*)
+(*(exper_somme exper_polys "export/exper_somme.txt");;*)
 
 
 
@@ -388,21 +394,16 @@ let exper_produit1 (l: polynome list) : polynome =
   let rec aux (l:polynome list) (acc:polynome) : polynome =
     match l with
     | [] -> acc
-    | a :: tl -> aux tl (poly_prod a acc) 
+    | a :: tl -> aux tl (poly_prod_canonique a acc) 
   in aux l [(1,0)];;
 
 (* Stratégie naïve récursive 2 *)
 let exper_produit2 (l: polynome list) : polynome =
   
-  let poly_prod_bis (p1:polynome) (p2:polynome) : polynome = 
-    let monome_prod (m:monome) (p:polynome) = 
-      List.map (fun (c, d) -> (c * (fst m), d + (snd m))) p 
-    in (List.fold_left (fun acc mon -> poly_add acc (monome_prod mon p2)) [] p1)
-
-  in let rec aux (l:polynome list) (acc:polynome) : polynome =
+  let rec aux (l:polynome list) (acc:polynome) : polynome =
     match l with
     | [] -> acc
-    | a :: tl -> aux tl (poly_prod_bis a acc)
+    | a :: tl -> aux tl (poly_prod a acc)
   in canonique(aux l [(1,0)]);;
 
 (* Stratégie naïve itérative *)
@@ -413,7 +414,7 @@ let exper_produit3 (l: polynome list) : polynome =
     match !remaining with
     | [] -> ()
     | a :: tl -> 
-      result := poly_prod a !result; 
+      result := poly_prod_canonique a !result; 
       remaining := tl 
   done;
   !result;;
@@ -421,26 +422,16 @@ let exper_produit3 (l: polynome list) : polynome =
 (* Stratégie diviser pour régner *)
 let exper_produit4 (l: polynome list) : polynome =
 
-  let split_at (index:int) (l: polynome list) =
-    let rec aux i acc1 acc2 = function
-      | [] -> (List.rev acc1, List.rev acc2)
-      | x :: xs when i < index -> aux (i + 1) (x :: acc1) acc2 xs
-      | x :: xs -> aux (i + 1) acc1 (x :: acc2) xs
-    in
-    aux 0 [] [] l
-
-  in let rec divide_and_conquer (l: polynome list) : polynome =
-  match l with
-  | [] -> [] 
-  | [a] -> a
-  | _ ->
-    let mid = List.length l / 2 in
-    let (l1, l2) = (split_at mid l) in
-    let p1 = divide_and_conquer l1 in
-    let p2 = divide_and_conquer l2 in
-    poly_prod p1 p2
-
-  in divide_and_conquer l;;
+  let rec divide_and_conquer (l:polynome list) (debut:int) (longueur:int) : polynome =
+    if longueur = 0 then []
+    else if longueur = 1 then List.nth l debut
+    else
+      let milieu = longueur / 2 in
+      let p1 = divide_and_conquer l debut milieu in
+      let p2 = divide_and_conquer l (debut + milieu) (longueur - milieu) in
+      poly_prod_canonique p1 p2
+  
+  in divide_and_conquer l 0 (List.length l);;
 
 (* Test du bon fonctionnement des stratégies de produit *)
 let exper_test_polys_prod = [(175,0); (145,1); (472,2); (1095,3); (859,4); (1408,5); (1786,6); (1020,7); (936,8); (752,9); (192,10)];;
@@ -490,7 +481,7 @@ let rec exper_produit (pll:polynome list list) (f:string) (debug:bool) =
   
     exper_produit l f debug;;     
         
-(*(exper_produit exper_polys "exp_produit.txt" false);;*)
+(*(exper_produit exper_polys "export/exper_produit.txt" false);;*)
 
 
 
@@ -507,7 +498,7 @@ let rec exper_gen_abr_15 (pow_max:int) : expression list =
     if n > max then []
     else 
       let nbr = (power_positif 2 n) in
-      let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "exper_gen_abr_16.txt" in
+      let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "export/exper_gen_abr_15.txt" in
       let start_time = Sys.time () in
       let exper_abr = (exper_gen_abrs 1 nbr) in
       let end_time = Sys.time () in
@@ -525,10 +516,10 @@ let rec exper_gen_abr_15 (pow_max:int) : expression list =
 
 (* Question 2.17 *)
 
-(*let exper_somme_15 = exper_somme [exper_polys_15] "exp_somme_15.txt";;*)
+(*let exper_somme_15 = exper_somme [exper_polys_15] "export/exper_somme_15.txt";;*)
 
 
 
 (* Question 2.18 *)
 
-(*let exper_produit_15 = exper_produit [exper_polys_15] "exp_produit_15.txt" false;;*)
+(*let exper_produit_15 = exper_produit [exper_polys_15] "export/exper_produit_15.txt" false;;*)
