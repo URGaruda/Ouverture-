@@ -473,7 +473,7 @@ let rec exper_produit (pll:polynome list list) (f:string) (debug:bool) =
     (* Application des stratégies de produit *)
     let produit1 = time_execution exper_produit1 pl f false in
     let produit2 = time_execution exper_produit2 pl f false in
-    let produit3 = time_execution exper_produit3 pl f true in
+    let produit3 = time_execution exper_produit3 pl f false in
     let produit4 = time_execution exper_produit4 pl f true in
 
     (* Logs de debug *)
