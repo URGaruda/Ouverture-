@@ -8,7 +8,7 @@ import matplotlib.cm as cm
 
 iterations = []
 durations = []
-file= open("exper_13_14_15/exper_gen_abrs_20.txt","r")
+file= open("exper_16_17_18_19/exper_gen_abr_15_5.txt","r")
 lines = file.readlines()
 for line in lines:
     res=line.strip().split(":")
@@ -21,13 +21,13 @@ couleur=cm.tab20(np.linspace(0, 1, 20))
 plt.plot(durations,iterations,label=f"etiquetage",color=couleur[random.randint(0,19)])
     
 plt.legend()
-plt.ylabel("Itérations")
+plt.ylabel("Puissance de 2")
 plt.xlabel("Durée")
 plt.show()
 file.close()
 # Courbes pour les résultats de la 2.14 
 
-
+"""
 iterations = []
 durations = []
 taille_liste = []
@@ -74,7 +74,7 @@ plt.show()
 #plt.ylabel("taille du polynome")
 #plt.show()
 file.close()
-
+"""
 
 #  Courbes pour les résultats de la 2.15
 """
