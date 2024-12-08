@@ -44,27 +44,26 @@ let () =
 
 (* Question 1.3 *)
 
-let poly_add (p1:polynome) (p2:polynome) : polynome =
+let rec poly_add (p1:polynome) (p2:polynome) : polynome =
+  match p1, p2 with
+  | [], [] -> []
+  | [], p2 -> p2
+  | p1, [] -> p1
+  | (c1, d1)::t1, (c2, d2)::t2 ->
+    if d1 = d2 then
+      let sum = c1 + c2 in
+      if sum = 0 then poly_add t1 t2 else (sum, d1) :: poly_add t1 t2
+    else if d1 < d2 then (c1, d1) :: poly_add t1 p2
+    else (c2, d2) :: poly_add p1 t2;;
 
-  let rec aux (p1:polynome) (p2:polynome) : polynome =
-    match p1, p2 with
-    | [], [] -> []
-    | [], p2 -> p2
-    | p1, [] -> p1
-    | (c1, d1)::t1, (c2, d2)::t2 ->
-      if d1 = d2 then
-        let sum = c1 + c2 in
-        if sum = 0 then aux t1 t2 else (sum, d1) :: aux t1 t2
-      else if d1 < d2 then (c1, d1) :: aux t1 p2
-      else (c2, d2) :: aux p1 t2
-
-  in ((aux p1 p2));;
+let poly_add_canonique (p1:polynome) (p2:polynome) : polynome =
+  (canonique (poly_add p1 p2));;
 
 let () = 
-  assert (poly_add [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(44,0); (-17,1); (2,2)]);
-  assert (poly_add (canonique poly1) (canonique poly2) = [(44,0); (-17,1); (2,2)]);
-  assert (poly_add (canonique poly1) (canonique poly3) = [(22,0); (-7,1); (2,2)]);
-  assert (poly_add (canonique poly4) (canonique poly5) = canonique poly4);;
+  assert (poly_add_canonique [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(44,0); (-17,1); (2,2)]);
+  assert (poly_add_canonique (canonique poly1) (canonique poly2) = [(44,0); (-17,1); (2,2)]);
+  assert (poly_add_canonique (canonique poly1) (canonique poly3) = [(22,0); (-7,1); (2,2)]);
+  assert (poly_add_canonique (canonique poly4) (canonique poly5) = canonique poly4);;
 
 
 
@@ -75,13 +74,16 @@ let poly_prod (p1:polynome) (p2:polynome) : polynome =
   let monome_prod (m:monome) (p:polynome) = 
     List.map (fun (c, d) -> (c * (fst m), d + (snd m))) p 
       
-  in (canonique (List.fold_left (fun acc mon -> poly_add acc (monome_prod mon p2)) [] p1));;
+  in (List.fold_left (fun acc mon -> poly_add acc (monome_prod mon p2)) [] p1);;
+
+let poly_prod_canonique (p1:polynome) (p2:polynome) : polynome =
+  (canonique (poly_prod p1 p2));;
 
 let () = 
-  assert (poly_prod [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(484,0); (-374,1); (104,2); (-10,3)]);
-  assert (poly_prod (canonique poly1) (canonique poly2) = [(484,0); (-374,1); (104,2); (-10,3)]);
-  assert (poly_prod (canonique poly1) (canonique poly3) = [(110,1); (-60,2); (10,3)]);
-  assert (poly_prod (canonique poly4) (canonique poly5) = []);;
+  assert (poly_prod_canonique [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(484,0); (-374,1); (104,2); (-10,3)]);
+  assert (poly_prod_canonique (canonique poly1) (canonique poly2) = [(484,0); (-374,1); (104,2); (-10,3)]);
+  assert (poly_prod_canonique (canonique poly1) (canonique poly3) = [(110,1); (-60,2); (10,3)]);
+  assert (poly_prod_canonique (canonique poly4) (canonique poly5) = []);;
 
 
 
@@ -117,7 +119,7 @@ let arb2poly (exp:expression) : polynome =
       | (h :: t) -> match h with
       | Int value -> (mult2poly t (value * fst m, snd m) false)
       | Pow (var, value) -> let p = (testPow (var, value)) in (mult2poly t (fst m, snd p + snd m) false)
-      | Plus list -> poly_prod (plus2poly list true) (mult2poly t (fst m, snd m) false)
+      | Plus list -> poly_prod_canonique (plus2poly list true) (mult2poly t (fst m, snd m) false)
       | Mult _ -> raise (Invalid_argument "Un produit ne peut pas contenir de produits") 
                
   and plus2poly (l:expression list) (is_first_exp:bool) : polynome = 
