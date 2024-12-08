@@ -273,16 +273,3 @@ let gen_arb (e:expression) : expression =
 let figure_droite = Plus [Mult [Int 123; Pow ('x',1)]; Plus [Int 42; Pow ('x',3)]];; 
 let () = 
   assert ((gen_arb figure_droite) = figure1);;
-
-
-
-(* Question 2.13 *) 
-
-let gen_exp (n:int) (taille:int) : expression list =
-  
-  let rec gen_permutations n =
-    if n <= 0 then []
-    else (gen_permutation taille) :: (gen_permutations (n - 1))
-
-  in List.map gen_arb (List.map etiquetage (List.map abr (gen_permutations n)));;
-
