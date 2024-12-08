@@ -216,12 +216,11 @@ let gen_permutation (n:int) : int list =
     if List.length l > 0 
     then let extr = (extraction_alea l p) in (aux (fst extr) (snd extr))
     else ([], p)
-  
-  (*in let per = snd (aux (gen_liste 1) []) in 
-  let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "gen_permutation.txt" in
+  in let per = snd (aux (gen_liste 1) []) in 
+  (*let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "gen_permutation.txt" in
   Printf.fprintf file "%d:%s\n" n (String.concat ";" (List.map string_of_int per));
-  close_out file;
-  per*);;
+  close_out file;*)
+  per;;
 
 
 
@@ -284,7 +283,7 @@ let () =
 
 let exper_gen_abrs (n:int) (taille:int) : expression list =
   
-  let rec gen_permutations (n:int) =
+  let rec gen_permutations (n:int) : int list list =
     if n <= 0 then []
     else (gen_permutation taille) :: (gen_permutations (n - 1))
 
@@ -513,7 +512,7 @@ let rec exper_gen_abr_15 (pow_max:int) : expression list =
       let exper_abr = (exper_gen_abrs 1 nbr) in
       let end_time = Sys.time () in
       let duration = end_time -. start_time in
-      Printf.fprintf file "%d:%f\n" nbr n duration;
+      Printf.fprintf file "%d:%f\n" nbr duration;
       close_out file;
       exper_abr@(aux (n + 1) max)
   
