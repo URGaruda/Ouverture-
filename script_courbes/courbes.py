@@ -8,7 +8,7 @@ import matplotlib.cm as cm
 
 iterations = []
 durations = []
-file= open("exper_16_17_18_19/exper_gen_abr_15.txt","r")
+file= open("exper_13_14_15/exper_gen_abrs_20.txt","r")
 lines = file.readlines()
 for line in lines:
     res=line.strip().split(":")
@@ -27,11 +27,11 @@ plt.show()
 file.close()
 # Courbes pour les résultats de la 2.14 
 
-"""
+
 iterations = []
 durations = []
 taille_liste = []
-file = open('exper_16_17_18_19/exper_somme_15_2.txt', "r")
+file = open('exper_13_14_15/exper_somme.txt', "r")
 lines = file.readlines()
 for line in lines:
     res=line.strip().split(":")
@@ -57,9 +57,9 @@ fct_len = len_array.T.tolist()
 couleur=cm.tab20(np.linspace(0, 1, len(fct_len))) 
 
 for i,(ls_tps,ls_len,c) in enumerate(zip(fct_tps,fct_len,couleur)):
-    #plt.plot(ls_tps,iterations,label=f"exp_somme{i+1}",color=c)
+    plt.plot(ls_tps,iterations,label=f"exp_somme{i+1}",color=c)
     #plt.scatter(iterations,ls_len,label=f"exp_somme{i+1}",color=c)
-    plt.scatter(ls_tps,iterations,label=f"exp_somme{i+1}",color=c)
+    #plt.scatter(ls_tps,iterations,label=f"exp_somme{i+1}",color=c)
 plt.legend()
 plt.ylabel("Itérations")
 plt.xlabel("Durée")
@@ -74,7 +74,7 @@ plt.show()
 #plt.ylabel("taille du polynome")
 #plt.show()
 file.close()
-"""
+
 
 #  Courbes pour les résultats de la 2.15
 """
