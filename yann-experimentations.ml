@@ -44,25 +44,19 @@ let () =
 
 (* Question 1.3 *)
 
-let poly_add p1 p2 =
+let poly_add (p1:polynome) (p2:polynome) : polynome =
 
-  let rec add p1 p2 acc =
+  let rec aux (p1:polynome) (p2:polynome) (acc:polynome) : polynome =
     match p1, p2 with
-    | [], [] -> acc 
-    | (c1, d1) :: t1, [] -> (c1, d1) :: acc @ t1  
-    | [], (c2, d2) :: t2 -> (c2, d2) :: acc @ t2  
-    | (c1, d1) :: t1, (c2, d2) :: t2 when d1 = d2 -> 
-      let new_coef = c1 + c2 in
-        if new_coef = 0 then add t1 t2 acc
-        else add t1 t2 ((new_coef, d1) :: acc)
-    | (c1, d1) :: t1, (c2, d2) :: t2 when d1 < d2 -> 
-      add t1 p2 ((c1, d1) :: acc)
-    | (c1, d1) :: t1, (c2, d2) :: t2 ->  
-      add p1 t2 ((c2, d2) :: acc)
-  
-  in let resultat = add p1 p2 [] 
+    | [], [] -> acc
+    | (c1, d1) :: t1, [] -> aux t1 [] ((c1, d1) :: acc)
+    | [], (c2, d2) :: t2 -> aux [] t2 ((c2, d2) :: acc) 
+    | (c1, d1) :: t1, (c2, d2) :: t2 ->
+      if d1 = d2 then aux t1 t2 ((c1 + c2, d1) :: acc)
+      else if d1 < d2 then aux t1 p2 ((c1, d1) :: acc)
+      else aux p1 t2 ((c2, d2) :: acc)
     
-  in List.sort (fun (_, d1) (_, d2) -> compare d1 d2) resultat;;
+  in (canonique (aux p1 p2 []));;
 
 let () = 
   assert (poly_add [(22,0); (-12,1); (2,2)] [(22,0); (-5,1)] = [(44,0); (-17,1); (2,2)]);
@@ -223,7 +217,11 @@ let gen_permutation (n:int) : int list =
     then let extr = (extraction_alea l p) in (aux (fst extr) (snd extr))
     else ([], p)
   
-  in snd (aux (gen_liste 1) []);;
+  (*in let per = snd (aux (gen_liste 1) []) in 
+  let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "gen_permutation.txt" in
+  Printf.fprintf file "%d:%s\n" n (String.concat ";" (List.map string_of_int per));
+  close_out file;
+  per*);;
 
 
 
@@ -284,7 +282,7 @@ let () =
 
 (* Question 2.13 *) 
 
-let gen_exp (n:int) (taille:int) : expression list =
+let exper_gen_abrs (n:int) (taille:int) : expression list =
   
   let rec gen_permutations n =
     if n <= 0 then []
@@ -292,27 +290,41 @@ let gen_exp (n:int) (taille:int) : expression list =
 
   in List.map gen_arb (List.map etiquetage (List.map abr (gen_permutations n)));;
 
-let gen_exp_20 (n:int) : expression list = 
-  gen_exp n 20;;
+
+let rec exper_gen_abrs_20 (n:int) (pas:int) (max:int) : expression list list =
+  if n > max then []
+  else 
+    let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "exper_gen_abrs_20.txt" in
+    let start_time = Sys.time () in
+    let exper_abr = (exper_gen_abrs n 20) in
+    let end_time = Sys.time () in
+    let duration = end_time -. start_time in
+    Printf.fprintf file "%d:%f\n" n duration;
+    close_out file;
+    exper_abr::(exper_gen_abrs_20 (n + pas) pas max);;
+
+(*let exper_polys = List.map (fun l -> List.map arb2poly l) (exper_gen_abrs_20 100 100 1000);;*)
 
 
 
-(* Question 2.14 *) 
-
+(* Fonction utile pour les expérimentations *)
 let time_execution fct arg f is_end =
   let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
   let start_time = Sys.time () in
   let result = fct arg in
   let end_time = Sys.time () in
   let duration = end_time -. start_time in
-  Printf.fprintf file "%f:%d" duration (List.length result);
+  Printf.fprintf file "%f,%d" duration (List.length result);
   if is_end then Printf.fprintf file "\n" else Printf.fprintf file ";";
-  Printf.printf "Temps d'execution : %fs\n" duration;
   close_out file;
   result;;
 
+
+
+(* Question 2.14 *) 
+
 (* Stratégie naïve récursive *)
-let exp_somme1 (l: polynome list) : polynome =
+let exper_somme1 (l: polynome list) : polynome =
   let rec aux (l:polynome list) (acc:polynome) : polynome =
     match l with
     | [] -> acc
@@ -320,11 +332,11 @@ let exp_somme1 (l: polynome list) : polynome =
   in aux l [];;  
 
 (* Stratégie avec List.fold_left *)
-let exp_somme2 (l: polynome list) : polynome =
+let exper_somme2 (l: polynome list) : polynome =
   List.fold_left poly_add [] l;;
 
 (* Stratégie naïve itérative *)
-let exp_somme3 (l: polynome list) : polynome =
+let exper_somme3 (l: polynome list) : polynome =
   let result = ref [] in
   let remaining = ref l in
     while !remaining <> [] do
@@ -336,49 +348,44 @@ let exp_somme3 (l: polynome list) : polynome =
     done;
     !result;;
 
-
-let exp_test_polys = [[(5,0); (1,1); (8,2); (12,3)]; [(7,0); (3,1); (2,2); (8,3)]; [(5,0); (1,1); (3,2); (6,3); (2,4)]];;
-let exp_test_polys_add = [(17,0); (5,1); (13,2); (26,3); (2,4)];;
+(* Test du bon fonctionnement des stratégies de somme *)
+let exper_test_polys = [[(5,0); (1,1); (8,2); (12,3)]; [(7,0); (3,1); (2,2); (8,3)]; [(5,0); (1,1); (3,2); (6,3); (2,4)]];;
+let exper_test_polys_add = [(17,0); (5,1); (13,2); (26,3); (2,4)];;
 
 let () =
-  assert(exp_somme1 exp_test_polys = exp_test_polys_add);
-  assert(exp_somme2 exp_test_polys = exp_test_polys_add);
-  assert(exp_somme3 exp_test_polys = exp_test_polys_add);;
+  assert(exper_somme1 exper_test_polys = exper_test_polys_add);
+  assert(exper_somme2 exper_test_polys = exper_test_polys_add);
+  assert(exper_somme3 exper_test_polys = exper_test_polys_add);;
 
 
-let exp_somme (taille:int) =
-
-  let rec aux (n:int) (pas:int) (max:int) (f:string) =
-      
+(* Mesure des temps d'exécution pour les stratégies de somme *)
+let rec exper_somme (pll:polynome list list) (f:string) =
+  match pll with
+  | [] -> ()
+  | pl :: l -> let n = List.length pl in
     let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
-    Printf.fprintf file "%d;" n;
+    Printf.fprintf file "%d:" n;
     close_out file;
-
-    Printf.printf "\nn = %d\n" n;
-
-    let exp_abr = (gen_exp n taille) in
-    let exp_poly = List.map arb2poly exp_abr in
-
-    let somme1 = time_execution exp_somme1 exp_poly f false in
-    let somme2 = time_execution exp_somme2 exp_poly f false in
-    let somme3 = time_execution exp_somme3 exp_poly f true in
-
+  
+    (* Application des stratégies de somme *)
+    let somme1 = time_execution exper_somme1 pl f false in
+    let somme2 = time_execution exper_somme2 pl f false in
+    let somme3 = time_execution exper_somme3 pl f true in
+  
     assert (somme1 = somme2);
     assert (somme2 = somme3);
     assert (List.length somme1 > 0);
-
-    if n < max then aux (n + pas) pas max f
-
-  in aux 100 100 1000 "exp_somme.txt";;
   
-(* exp_somme 20;; *)
+    exper_somme l f;;     
+        
+(*(exper_somme exper_polys "exp_somme.txt");;*)
 
 
 
 (* Question 2.15 *) 
 
 (* Stratégie naïve récursive 1 *)
-let exp_produit1 (l: polynome list) : polynome =
+let exper_produit1 (l: polynome list) : polynome =
   let rec aux (l:polynome list) (acc:polynome) : polynome =
     match l with
     | [] -> acc
@@ -386,7 +393,7 @@ let exp_produit1 (l: polynome list) : polynome =
   in aux l [(1,0)];;
 
 (* Stratégie naïve récursive 2 *)
-let exp_produit2 (l: polynome list) : polynome =
+let exper_produit2 (l: polynome list) : polynome =
   
   let poly_prod_bis (p1:polynome) (p2:polynome) : polynome = 
     let monome_prod (m:monome) (p:polynome) = 
@@ -399,12 +406,8 @@ let exp_produit2 (l: polynome list) : polynome =
     | a :: tl -> aux tl (poly_prod_bis a acc)
   in canonique(aux l [(1,0)]);;
 
-(* Stratégie avec List.fold_left *)
-let exp_produit3 (l: polynome list) : polynome =
-  List.fold_left poly_prod [(1,0)] l;;
-
 (* Stratégie naïve itérative *)
-let exp_produit4 (l: polynome list) : polynome =
+let exper_produit3 (l: polynome list) : polynome =
   let result = ref [(1,0)] in 
   let remaining = ref l in  
   while !remaining <> [] do
@@ -417,7 +420,7 @@ let exp_produit4 (l: polynome list) : polynome =
   !result;;
 
 (* Stratégie diviser pour régner *)
-let exp_produit5 (l: polynome list) : polynome =
+let exper_produit4 (l: polynome list) : polynome =
 
   let split_at (index:int) (l: polynome list) =
     let rec aux i acc1 acc2 = function
@@ -440,44 +443,94 @@ let exp_produit5 (l: polynome list) : polynome =
 
   in divide_and_conquer l;;
 
-
-let exp_test_polys_prod = [(175,0); (145,1); (472,2); (1095,3); (859,4); (1408,5); (1786,6); (1020,7); (936,8); (752,9); (192,10)];;
+(* Test du bon fonctionnement des stratégies de produit *)
+let exper_test_polys_prod = [(175,0); (145,1); (472,2); (1095,3); (859,4); (1408,5); (1786,6); (1020,7); (936,8); (752,9); (192,10)];;
 
 let () =
-  assert (exp_produit1 exp_test_polys = exp_test_polys_prod);
-  assert (exp_produit2 exp_test_polys = exp_test_polys_prod);
-  assert (exp_produit3 exp_test_polys = exp_test_polys_prod);
-  assert (exp_produit4 exp_test_polys = exp_test_polys_prod);
-  assert (exp_produit5 exp_test_polys = exp_test_polys_prod);;
+  assert (exper_produit1 exper_test_polys = exper_test_polys_prod);
+  assert (exper_produit2 exper_test_polys = exper_test_polys_prod);
+  assert (exper_produit3 exper_test_polys = exper_test_polys_prod);
+  assert (exper_produit4 exper_test_polys = exper_test_polys_prod);;
 
 
-let exp_produit (taille:int) =
-
-  let rec aux (n:int) (pas:int) (max:int) (f:string) =
+(* Mesure des temps d'exécution pour les stratégies de produit *)
+let rec exper_produit (pll:polynome list list) (f:string) (debug:bool) =
+  match pll with
+  | [] -> ()
+  | pl :: l -> 
     
+    let n = List.length pl in
     let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
-    Printf.fprintf file "%d;" n;
+
+    (* Logs de debug *)
+    if debug then (Printf.fprintf file "\n\nListe des polynomes a multiplier pour n=%d :\n\n" n;
+    Printf.fprintf file "[";
+    List.iter (fun p -> Printf.fprintf file "%s ; " (String.concat "" (List.map (fun (c, d) -> Printf.sprintf "(%d,%d)" c d) p))) pl;
+    Printf.fprintf file "]\n\n");
+
+    Printf.fprintf file "%d:" n;
     close_out file;
 
-    Printf.printf "\nn = %d\n" n;
-  
-    let exp_abr = gen_exp n taille in
-    let exp_poly = List.map arb2poly exp_abr in
-  
-    let produit1 = time_execution exp_produit1 exp_poly f false in
-    let produit2 = time_execution exp_produit2 exp_poly f false in
-    (*let produit3 = time_execution exp_produit3 exp_poly f false in*)
-    let produit4 = time_execution exp_produit4 exp_poly f false in
-    let produit5 = time_execution exp_produit5 exp_poly f true in
+    (* Application des stratégies de produit *)
+    let produit1 = time_execution exper_produit1 pl f false in
+    let produit2 = time_execution exper_produit2 pl f false in
+    let produit3 = time_execution exper_produit3 pl f true in
+    let produit4 = time_execution exper_produit4 pl f true in
 
+    (* Logs de debug *)
+    if debug then (let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 f in
+    Printf.fprintf file "\nResultat de la multiplication :\n\n[";
+    Printf.fprintf file "%s;" (String.concat "" (List.map (fun (c, d) -> Printf.sprintf "(%d,%d)" c d) produit1));
+    Printf.fprintf file "]\n\n";
+    close_out file);
+  
     assert (produit1 = produit2);
-    (*assert (produit1 = produit3);*)
+    assert (produit1 = produit3);
     assert (produit1 = produit4);
-    assert (produit1 = produit5);
     assert (List.length produit1 > 0);
   
-    if n < max then aux (n + pas) pas max f
+    exper_produit l f debug;;     
+        
+(*(exper_produit exper_polys "exp_produit.txt" false);;*)
+
+
+
+(* Question 2.16 *)
+
+let rec exper_gen_abr_15 (pow_max:int) : expression list =
+
+  let rec power_positif (i:int) (n:int) : int = 
+    if n <= 0 then 1
+    else if n = 1 then i
+    else i * (power_positif i (n - 1))
+
+  in let rec aux (n:int) (max:int) : expression list =
+    if n > max then []
+    else 
+      let nbr = (power_positif 2 n) in
+      let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "exper_gen_abr_16.txt" in
+      let start_time = Sys.time () in
+      let exper_abr = (exper_gen_abrs 1 nbr) in
+      let end_time = Sys.time () in
+      let duration = end_time -. start_time in
+      Printf.fprintf file "%d:%f\n" nbr n duration;
+      close_out file;
+      exper_abr@(aux (n + 1) max)
   
-  in aux 100 100 1000 "exp_produit.txt";;
-  
-(* exp_produit 20;; *)
+  in (aux (-1) pow_max);;
+
+
+(*let exper_polys_15 = List.map arb2poly (exper_gen_abr_15 13);;*)
+
+
+
+(* Question 2.17 *)
+
+(*let exper_somme_15 = exper_somme [exper_polys_15] "exp_somme_15.txt";;*)
+
+
+
+(* Question 2.18 *)
+
+(*let exper_produit_15 = exper_produit [exper_polys_15] "exp_produit_15.txt" false;;*)
+
