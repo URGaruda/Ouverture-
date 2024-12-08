@@ -222,9 +222,9 @@ let gen_permutation (n:int) : int list =
     else ([], p)
   
   in let per = snd (aux (gen_liste 1) []) in 
-  let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "export/gen_permutation.txt" in
+  (*let file = open_out_gen [Open_creat; Open_append; Open_text] 0o666 "export/gen_permutation.txt" in
   Printf.fprintf file "Permutations pour n=%d :\n%s\n\n" n (String.concat ";" (List.map string_of_int per));
-  close_out file;
+  close_out file;*)
   per;;
 
 
